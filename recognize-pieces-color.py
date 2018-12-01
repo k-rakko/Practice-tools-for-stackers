@@ -47,7 +47,7 @@ class Config(wx.Frame):
         self.config = self.board.get_config()
         
         panel = wx.Panel(self, wx.ID_ANY)
-        sizer = wx.GridBagSizer(2, 10)
+        sizer = wx.GridBagSizer(2, 12)
         grid_y = 0
         
         
@@ -67,9 +67,24 @@ class Config(wx.Frame):
             self.col_check_list.append((color, checkbox))
             grid_y += 1
                        
-
+        ##config about average height.
+        grid_y += 1
+        h_text = wx.StaticText(panel, wx.ID_ANY, "Average height of garbage blocks.\n(-1 to random)")
+        sizer.Add(h_text, pos=(grid_y, 0))
+        grid_y += 1
+        
+        
+        self.h_spin = wx.SpinCtrl(panel, min=-1, max=20, style=wx.SP_ARROW_KEYS)
+        
+        self.h_spin.SetValue(self.config["height"])
+        sizer.Add(self.h_spin, pos=(grid_y, 0))
+        grid_y += 1
+        
+        
+        
         
         ##Save and cancel config Button
+        grid_y += 1
         s_button = wx.Button(panel, wx.ID_ANY, "Save")
         can_button = wx.Button(panel, wx.ID_ANY, "Cancel")
         
@@ -84,7 +99,7 @@ class Config(wx.Frame):
         panel.SetSizer(sizer)
         
         #General Frame setting
-        self.SetSize((200, 500))
+        self.SetSize((300, 500))
         self.Center()
         
         
@@ -97,6 +112,9 @@ class Config(wx.Frame):
             self.config["colors"][color] = conf
             if conf:
                 checked = True
+                
+        ##Average height setting
+        self.config["height"] = self.h_spin.GetValue()
         
         #if checked == False, no box is checked so need to alert and return.
         if checked:
@@ -139,6 +157,8 @@ class Board(wx.Panel):
         
         self.color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
         self.enabled_colors = [x for x in range(1, 8)]
+        
+        self.average_height = -1
     
         
     def init_Board(self):
@@ -227,8 +247,10 @@ class Board(wx.Panel):
         
         
       
-
-        garbage_height = random.randint(0, int(self.FieldHeight * 0.6))
+        if self.average_height == -1:
+            garbage_height = random.randint(0, int(self.FieldHeight * 0.6))
+        else:
+            garbage_height = self.average_height
         
         height_change = [0, 0, 0, 0, 0, +1, +1, -1, -1, +2, -2]
         garbage_h_list = []
@@ -236,6 +258,11 @@ class Board(wx.Panel):
         for i in range(10):
             garbage_h_list.append(garbage_height)
             garbage_height += height_change[random.randint(0, len(height_change)-1)]
+            
+            if garbage_height < 0:
+                garbage_height = 0
+            elif garbage_height > 20:
+                garbage_height = 20
         
         hole_change = random.randint(0, max(0, garbage_height-1))
         hole_positions = [random.randint(0, 9) for x in range(2)]
@@ -256,6 +283,7 @@ class Board(wx.Panel):
                 self.field[y][hole_positions[1]] = 0
     
     def set_config(self, config):
+        #color config
         index = 1
         self.enabled_colors = []
         for color in self.color_table:
@@ -263,6 +291,10 @@ class Board(wx.Panel):
                 self.enabled_colors.append(index)
                 
             index += 1
+            
+        #Average height
+        
+        self.average_height = config["height"]
         
     def get_config(self):
         config = dict()
@@ -277,6 +309,8 @@ class Board(wx.Panel):
             index += 1
             
         config["colors"] = color_config
+        
+        config["height"] = self.average_height
         
         return config
         
