@@ -4,11 +4,90 @@ import random
 class ColorPrac(wx.Frame):
     
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, size=(300, 440),
+        wx.Frame.__init__(self, parent, size=(300, 460),
             style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX)
         
         self.init_frame()
+        self.init_ui()
         
+    def init_ui(self):
+        
+        menubar = wx.MenuBar()
+        self.configMenu = wx.Menu()
+        
+        #check item for color.
+        self.chitems = dict()
+        self.chlist = []
+        
+        self.shcy = self.configMenu.Append(wx.ID_ANY
+                                      , "Cyan"
+                                      , "Enabele/Disable Cyan"
+                                      ,kind=wx.ITEM_CHECK)
+        self.chlist.append(self.shcy)
+        
+        self.shyl = self.configMenu.Append(wx.ID_ANY
+                                      , "Yellow"
+                                      , "Enabele/Disable Yellow"
+                                      ,kind=wx.ITEM_CHECK)
+        self.chlist.append(self.shyl)
+        
+        self.shor = self.configMenu.Append(wx.ID_ANY
+                                      , "Orange"
+                                      , "Enabele/Disable Orange"
+                                      ,kind=wx.ITEM_CHECK)
+        self.chlist.append(self.shor)
+        
+        self.shbl = self.configMenu.Append(wx.ID_ANY
+                                      , "Blue"
+                                      , "Enabele/Disable Blue"
+                                      ,kind=wx.ITEM_CHECK)
+        self.chlist.append(self.shbl)
+        
+        self.shgr = self.configMenu.Append(wx.ID_ANY
+                                      , "Green"
+                                      , "Enabele/Disable Green"
+                                      ,kind=wx.ITEM_CHECK)
+        self.chlist.append(self.shgr)
+        
+        self.shre = self.configMenu.Append(wx.ID_ANY
+                                      , "Red"
+                                      , "Enabele/Disable Red"
+                                      ,kind=wx.ITEM_CHECK)
+        self.chlist.append(self.shre)
+        
+        self.shpu = self.configMenu.Append(wx.ID_ANY
+                                      , "Purple"
+                                      , "Enabele/Disable Purple"
+                                      ,kind=wx.ITEM_CHECK)
+        self.chlist.append(self.shpu)
+        
+        for i in range(len(self.chlist)):
+            self.chitems[self.chlist[i].GetId()] = i+1
+        
+        for chitem in self.chlist:
+            self.configMenu.Check(chitem.GetId(), True)
+            self.Bind(wx.EVT_MENU, self.set_config, chitem)
+        
+        menubar.Append(self.configMenu, "&Config")
+        
+        self.SetMenuBar(menubar)
+        
+    def set_config(self, event):
+        chid = event.GetId()
+        
+        #At least 1 check must be on.
+        if not self.board.tick_colors(self.chitems[chid]):
+            self.configMenu.Check(chid, True)
+        
+            
+        
+        
+
+        
+        
+        
+        
+    
     def init_frame(self):
         
         self.board = Board(self)
@@ -40,8 +119,11 @@ class Board(wx.Panel):
                   , "#adff2f", "#ff6347", "#ee82ee", "#f5f5f5"]
         
         self.dark_colors = ['#000000', "#6495ed", "#ffd700", "#cd853f", "#191970"
-                  , "#32cd32", "#dc143c", "#8a2be2", "#696969"]                  
+                  , "#32cd32", "#dc143c", "#8a2be2", "#696969"]   
         
+        
+        self.enabled_colors = [x for x in range(1, 8)]
+    
         
     def init_Board(self):
 
@@ -118,8 +200,8 @@ class Board(wx.Panel):
         self.draw_field()
         
         #create new next color.
-        
-        self.draw_next(random.randint(1, 7))
+        next_index = random.randint(0, len(self.enabled_colors)-1)
+        self.draw_next(self.enabled_colors[next_index])
         
     def make_new_question(self):
         #At now, hole will change at most 1 time.
@@ -156,6 +238,17 @@ class Board(wx.Panel):
                 self.field[y][hole_positions[0]] = 0
             else:
                 self.field[y][hole_positions[1]] = 0
+                
+                
+    def tick_colors(self, color):
+        if color in self.enabled_colors:
+            if len(self.enabled_colors) == 1:
+                return False
+            self.enabled_colors.remove(color)
+        else:
+            self.enabled_colors.append(color)
+        
+        return True
         
                 
                 
