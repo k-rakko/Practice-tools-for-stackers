@@ -4,7 +4,7 @@ import random
 class ColorPrac(wx.Frame):
     
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, size=(300, 460),
+        wx.Frame.__init__(self, parent, size=(300, 500),
             style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX)
         
         self.init_frame()
@@ -12,80 +12,18 @@ class ColorPrac(wx.Frame):
         
     def init_ui(self):
         
-        menubar = wx.MenuBar()
-        self.configMenu = wx.Menu()
+        toolbar = self.CreateToolBar()
+        ctool = toolbar.AddTool(wx.ID_ANY, "", wx.Bitmap("config.png"))
+        toolbar.Realize()
         
-        #check item for color.
-        self.chitems = dict()
-        self.chlist = []
+        self.Bind(wx.EVT_TOOL, self.OnConfig, ctool)
         
-        self.shcy = self.configMenu.Append(wx.ID_ANY
-                                      , "Cyan"
-                                      , "Enabele/Disable Cyan"
-                                      ,kind=wx.ITEM_CHECK)
-        self.chlist.append(self.shcy)
+    def OnConfig(self, e):
         
-        self.shyl = self.configMenu.Append(wx.ID_ANY
-                                      , "Yellow"
-                                      , "Enabele/Disable Yellow"
-                                      ,kind=wx.ITEM_CHECK)
-        self.chlist.append(self.shyl)
-        
-        self.shor = self.configMenu.Append(wx.ID_ANY
-                                      , "Orange"
-                                      , "Enabele/Disable Orange"
-                                      ,kind=wx.ITEM_CHECK)
-        self.chlist.append(self.shor)
-        
-        self.shbl = self.configMenu.Append(wx.ID_ANY
-                                      , "Blue"
-                                      , "Enabele/Disable Blue"
-                                      ,kind=wx.ITEM_CHECK)
-        self.chlist.append(self.shbl)
-        
-        self.shgr = self.configMenu.Append(wx.ID_ANY
-                                      , "Green"
-                                      , "Enabele/Disable Green"
-                                      ,kind=wx.ITEM_CHECK)
-        self.chlist.append(self.shgr)
-        
-        self.shre = self.configMenu.Append(wx.ID_ANY
-                                      , "Red"
-                                      , "Enabele/Disable Red"
-                                      ,kind=wx.ITEM_CHECK)
-        self.chlist.append(self.shre)
-        
-        self.shpu = self.configMenu.Append(wx.ID_ANY
-                                      , "Purple"
-                                      , "Enabele/Disable Purple"
-                                      ,kind=wx.ITEM_CHECK)
-        self.chlist.append(self.shpu)
-        
-        for i in range(len(self.chlist)):
-            self.chitems[self.chlist[i].GetId()] = i+1
-        
-        for chitem in self.chlist:
-            self.configMenu.Check(chitem.GetId(), True)
-            self.Bind(wx.EVT_MENU, self.set_config, chitem)
-        
-        menubar.Append(self.configMenu, "&Config")
-        
-        self.SetMenuBar(menubar)
-        
-    def set_config(self, event):
-        chid = event.GetId()
-        
-        #At least 1 check must be on.
-        if not self.board.tick_colors(self.chitems[chid]):
-            self.configMenu.Check(chid, True)
-        
-            
-        
-        
-
-        
-        
-        
+        con_app = wx.App()
+        self.config = Config(self)
+        self.config.Show()
+        con_app.MainLoop()
         
     
     def init_frame(self):
@@ -95,6 +33,84 @@ class ColorPrac(wx.Frame):
         
         self.SetTitle("Next Color Practice")
 
+class Config(wx.Frame):
+    def __init__(self, parent):
+        wx.Frame.__init__(self
+                          , parent
+                          ,style=wx.DEFAULT_DIALOG_STYLE)
+        
+        self.board = parent.board
+        self.init_ui()
+        
+    def init_ui(self):
+        
+        self.config = self.board.get_config()
+        
+        panel = wx.Panel(self, wx.ID_ANY)
+        sizer = wx.GridBagSizer(2, 10)
+        grid_y = 0
+        
+        
+        ##Color variation setting.
+        self.col_check_list = []
+        c_text = wx.StaticText(panel, wx.ID_ANY, "Colors")
+        sizer.Add(c_text, pos=(grid_y, 0))
+        grid_y += 1
+        
+        #checkbox to choose color
+        color_labels = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
+        
+        for color in color_labels:
+            checkbox = wx.CheckBox(panel, wx.ID_ANY, color)
+            checkbox.SetValue(self.config["colors"][color])
+            sizer.Add(checkbox, pos=(grid_y, 0))
+            self.col_check_list.append((color, checkbox))
+            grid_y += 1
+                       
+
+        
+        ##Save and cancel config Button
+        s_button = wx.Button(panel, wx.ID_ANY, "Save")
+        can_button = wx.Button(panel, wx.ID_ANY, "Cancel")
+        
+        s_button.Bind(wx.EVT_BUTTON, self.OnClickSave, s_button)
+        can_button.Bind(wx.EVT_BUTTON, self.OnClickCansel, can_button)
+            
+        sizer.Add(s_button, pos=(grid_y, 0))
+        sizer.Add(can_button, pos=(grid_y, 1))
+        
+        
+        #Sizer
+        panel.SetSizer(sizer)
+        
+        #General Frame setting
+        self.SetSize((200, 500))
+        self.Center()
+        
+        
+    def OnClickSave(self, e):
+        
+        ##Color setting
+        checked = False
+        for color, checkbox in self.col_check_list:
+            conf = checkbox.GetValue()
+            self.config["colors"][color] = conf
+            if conf:
+                checked = True
+        
+        #if checked == False, no box is checked so need to alert and return.
+        if checked:
+            self.board.set_config(self.config)
+            self.Close()
+        else:
+            dial = wx.MessageDialog(None
+                                    , "At least one color must be checked!"
+                                    , "Alert"
+                                    , wx.OK)
+            dial.ShowModal()
+            
+    def OnClickCansel(self, e):
+        self.Close()
 
 class Board(wx.Panel):
     
@@ -121,7 +137,7 @@ class Board(wx.Panel):
         self.dark_colors = ['#000000', "#6495ed", "#ffd700", "#cd853f", "#191970"
                   , "#32cd32", "#dc143c", "#8a2be2", "#696969"]   
         
-        
+        self.color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
         self.enabled_colors = [x for x in range(1, 8)]
     
         
@@ -238,19 +254,33 @@ class Board(wx.Panel):
                 self.field[y][hole_positions[0]] = 0
             else:
                 self.field[y][hole_positions[1]] = 0
+    
+    def set_config(self, config):
+        index = 1
+        self.enabled_colors = []
+        for color in self.color_table:
+            if config["colors"][color] == True:
+                self.enabled_colors.append(index)
                 
-                
-    def tick_colors(self, color):
-        if color in self.enabled_colors:
-            if len(self.enabled_colors) == 1:
-                return False
-            self.enabled_colors.remove(color)
-        else:
-            self.enabled_colors.append(color)
+            index += 1
         
-        return True
-        
+    def get_config(self):
+        config = dict()
+        color_config = dict()
+        index = 1
+        for color in self.color_table:
+            if index in self.enabled_colors:
+                color_config[color] = True
+            else:
+                color_config[color] = False
                 
+            index += 1
+            
+        config["colors"] = color_config
+        
+        return config
+        
+             
                 
         
             
