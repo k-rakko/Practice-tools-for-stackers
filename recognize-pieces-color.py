@@ -155,11 +155,20 @@ class Board(wx.Panel):
         self.dark_colors = ['#000000', "#6495ed", "#ffd700", "#cd853f", "#191970"
                   , "#32cd32", "#dc143c", "#8a2be2", "#696969"]   
         
-        self.color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
-        self.enabled_colors = [x for x in range(1, 8)]
         
-        self.average_height = -1
-    
+        self.config = dict()
+        
+        
+        #Colors for next blocks.
+        color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
+        
+        self.config["colors"] = {color:True for color in color_table}
+        
+        self.enabled_colors = [x+1 for x in range(7)]
+        
+        #Average height of blocks. (-1 to random)
+        self.config["height"] = -1
+        
         
     def init_Board(self):
 
@@ -247,10 +256,10 @@ class Board(wx.Panel):
         
         
       
-        if self.average_height == -1:
+        if self.config["height"] == -1:
             garbage_height = random.randint(0, int(self.FieldHeight * 0.6))
         else:
-            garbage_height = self.average_height
+            garbage_height = self.config["height"]
         
         height_change = [0, 0, 0, 0, 0, +1, +1, -1, -1, +2, -2]
         garbage_h_list = []
@@ -283,36 +292,20 @@ class Board(wx.Panel):
                 self.field[y][hole_positions[1]] = 0
     
     def set_config(self, config):
-        #color config
+        #appdate enabled_colors.
         index = 1
         self.enabled_colors = []
-        for color in self.color_table:
+        for color in self.config["colors"]:
             if config["colors"][color] == True:
                 self.enabled_colors.append(index)
                 
             index += 1
-            
-        #Average height
         
-        self.average_height = config["height"]
+        self.config = config
         
     def get_config(self):
-        config = dict()
-        color_config = dict()
-        index = 1
-        for color in self.color_table:
-            if index in self.enabled_colors:
-                color_config[color] = True
-            else:
-                color_config[color] = False
-                
-            index += 1
-            
-        config["colors"] = color_config
         
-        config["height"] = self.average_height
-        
-        return config
+        return self.config
         
              
                 
