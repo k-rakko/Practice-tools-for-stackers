@@ -2,10 +2,14 @@ import wx
 import random
 
 class ColorPrac(wx.Frame):
-    
+    """Main window class."""
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, size=(300, 500),
-            style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX)
+        wx.Frame.__init__(self,
+                          parent,
+                          size=(300, 500),
+                          style=wx.DEFAULT_FRAME_STYLE
+                                ^ wx.RESIZE_BORDER
+                                ^ wx.MAXIMIZE_BOX)
         
         self.init_frame()
         self.init_ui()
@@ -16,10 +20,10 @@ class ColorPrac(wx.Frame):
         ctool = toolbar.AddTool(wx.ID_ANY, "", wx.Bitmap("config.png"))
         toolbar.Realize()
         
-        self.Bind(wx.EVT_TOOL, self.OnConfig, ctool)
+        self.Bind(wx.EVT_TOOL, self.on_config, ctool)
         
-    def OnConfig(self, e):
-        
+    def on_config(self, e):
+        """run when config button in toolbar."""
         con_app = wx.App()
         self.config = Config(self)
         self.config.Show()
@@ -34,10 +38,11 @@ class ColorPrac(wx.Frame):
         self.SetTitle("Next Color Practice")
 
 class Config(wx.Frame):
+    """Main config window."""
     def __init__(self, parent):
-        wx.Frame.__init__(self
-                          , parent
-                          ,style=wx.DEFAULT_DIALOG_STYLE)
+        wx.Frame.__init__(self,
+                          parent,
+                          style=wx.DEFAULT_DIALOG_STYLE)
         
         self.board = parent.board
         self.init_ui()
@@ -57,10 +62,9 @@ class Config(wx.Frame):
         sizer.Add(c_text, pos=(grid_y, 0))
         grid_y += 1
         
-        #checkbox to choose color
-        color_labels = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
+       
         
-        for color in color_labels:
+        for color in self.config["colors"]:
             checkbox = wx.CheckBox(panel, wx.ID_ANY, color)
             checkbox.SetValue(self.config["colors"][color])
             sizer.Add(checkbox, pos=(grid_y, 0))
@@ -69,7 +73,9 @@ class Config(wx.Frame):
                        
         ##config about average height.
         grid_y += 1
-        h_text = wx.StaticText(panel, wx.ID_ANY, "Average height of garbage blocks.\n(-1 to random)")
+        h_text = wx.StaticText(panel,
+                               wx.ID_ANY,
+                               "Average height of garbage blocks.\n(-1 to random)")
         sizer.Add(h_text, pos=(grid_y, 0))
         grid_y += 1
         
@@ -88,8 +94,8 @@ class Config(wx.Frame):
         s_button = wx.Button(panel, wx.ID_ANY, "Save")
         can_button = wx.Button(panel, wx.ID_ANY, "Cancel")
         
-        s_button.Bind(wx.EVT_BUTTON, self.OnClickSave, s_button)
-        can_button.Bind(wx.EVT_BUTTON, self.OnClickCansel, can_button)
+        s_button.Bind(wx.EVT_BUTTON, self.on_click_save, s_button)
+        can_button.Bind(wx.EVT_BUTTON, self.on_click_cancel, can_button)
             
         sizer.Add(s_button, pos=(grid_y, 0))
         sizer.Add(can_button, pos=(grid_y, 1))
@@ -103,8 +109,8 @@ class Config(wx.Frame):
         self.Center()
         
         
-    def OnClickSave(self, e):
-        
+    def on_click_save(self, e):
+        """Launched when save button pressed."""
         ##Color setting
         checked = False
         for color, checkbox in self.col_check_list:
@@ -121,17 +127,18 @@ class Config(wx.Frame):
             self.board.set_config(self.config)
             self.Close()
         else:
-            dial = wx.MessageDialog(None
-                                    , "At least one color must be checked!"
-                                    , "Alert"
-                                    , wx.OK)
+            dial = wx.MessageDialog(None,
+                                    "At least one color must be checked!",
+                                    "Alert",
+                                    wx.OK)
             dial.ShowModal()
             
-    def OnClickCansel(self, e):
+    def on_click_cancel(self, e):
+        """Launched when cancel button pressed."""
         self.Close()
 
 class Board(wx.Panel):
-    
+    """panel for block field and next."""
     def __init__(self, *args, **kw):
         super(Board, self).__init__(*args, **kw)
         self.init_config()
@@ -146,20 +153,51 @@ class Board(wx.Panel):
     
         #block colors.
         #color = [No block, I, O, L, J, S, Z, T, Gray]
-        self.colors = ['#000000', '#87cefa', "#ffff00", "#ffa500", "#0000ff"
-                  , "#00ff00", "#ff0000", "#9400d3", "#a9a9a9"]
+        self.colors = ['#000000',
+                       '#87cefa',
+                       "#ffff00",
+                       "#ffa500",
+                       "#0000ff",
+                       "#00ff00",
+                       "#ff0000",
+                       "#9400d3",
+                       "#a9a9a9"]
     
-        self.light_colors = ['#000000', '#add8e6', "#ffffe0", "#f0e68c", "#1e90ff"
-                  , "#adff2f", "#ff6347", "#ee82ee", "#f5f5f5"]
+        self.light_colors = ['#000000',
+                             '#add8e6',
+                             "#ffffe0",
+                             "#f0e68c",
+                             "#1e90ff",
+                             "#adff2f",
+                             "#ff6347",
+                             "#ee82ee",
+                             "#f5f5f5"]
         
-        self.dark_colors = ['#000000', "#6495ed", "#ffd700", "#cd853f", "#191970"
-                  , "#32cd32", "#dc143c", "#8a2be2", "#696969"]   
+        self.dark_colors = ['#000000', 
+                            "#6495ed",
+                            "#ffd700",
+                            "#cd853f",
+                            "#191970",
+                            "#32cd32",
+                            "#dc143c",
+                            "#8a2be2",
+                            "#696969"]   
         
-        self.color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
-        self.enabled_colors = [x for x in range(1, 8)]
         
-        self.average_height = -1
-    
+        self.config = dict()
+        
+        
+        #Colors for next blocks.
+        color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
+        
+        self.config["colors"] = {color:True for color in color_table}
+        
+        #This list is used intenally.
+        self.enabled_nexts = [x+1 for x in range(7)]
+        
+        #Average height of blocks. (-1 to random)
+        self.config["height"] = -1
+        
         
     def init_Board(self):
 
@@ -188,8 +226,11 @@ class Board(wx.Panel):
             None
         
         """
-        self.draw_square(x*self.SquareSize, y*self.SquareSize,
-                         self.SquareSize, self.SquareSize, shape)
+        self.draw_square(x*self.SquareSize,
+                         y*self.SquareSize,
+                         self.SquareSize,
+                         self.SquareSize,
+                         shape)
         
     
         
@@ -218,8 +259,11 @@ class Board(wx.Panel):
         
         
     def draw_next(self, shape):
-        self.draw_square(12*self.SquareSize, 1*self.SquareSize
-                         , int(1.5*self.SquareSize), int(1.5*self.SquareSize), shape)
+        self.draw_square(12*self.SquareSize,
+                         1*self.SquareSize,
+                         int(1.5*self.SquareSize),
+                         int(1.5*self.SquareSize),
+                         shape)
                
         
     def on_key_down(self, event):
@@ -236,8 +280,8 @@ class Board(wx.Panel):
         self.draw_field()
         
         #create new next color.
-        next_index = random.randint(0, len(self.enabled_colors)-1)
-        self.draw_next(self.enabled_colors[next_index])
+        next_index = random.randint(0, len(self.enabled_nexts)-1)
+        self.draw_next(self.enabled_nexts[next_index])
         
     def make_new_question(self):
         #At now, hole will change at most 1 time.
@@ -247,10 +291,10 @@ class Board(wx.Panel):
         
         
       
-        if self.average_height == -1:
+        if self.config["height"] == -1:
             garbage_height = random.randint(0, int(self.FieldHeight * 0.6))
         else:
-            garbage_height = self.average_height
+            garbage_height = self.config["height"]
         
         height_change = [0, 0, 0, 0, 0, +1, +1, -1, -1, +2, -2]
         garbage_h_list = []
@@ -283,36 +327,21 @@ class Board(wx.Panel):
                 self.field[y][hole_positions[1]] = 0
     
     def set_config(self, config):
-        #color config
+        """setter of self.config"""
+        #appdate enabled_nexts.
         index = 1
-        self.enabled_colors = []
-        for color in self.color_table:
+        self.enabled_nexts = []
+        for color in self.config["colors"]:
             if config["colors"][color] == True:
-                self.enabled_colors.append(index)
+                self.enabled_nexts.append(index)
                 
             index += 1
-            
-        #Average height
         
-        self.average_height = config["height"]
+        self.config = config
         
     def get_config(self):
-        config = dict()
-        color_config = dict()
-        index = 1
-        for color in self.color_table:
-            if index in self.enabled_colors:
-                color_config[color] = True
-            else:
-                color_config[color] = False
-                
-            index += 1
-            
-        config["colors"] = color_config
-        
-        config["height"] = self.average_height
-        
-        return config
+        """getter of self.config"""
+        return self.config
         
              
                 
