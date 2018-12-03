@@ -2,56 +2,21 @@
 
 import random
 import wx
+import os
 
 class GameBoard(wx.Panel):
     """panel for block field and next."""
-    def __init__(self, *args, **kw):
-        super(GameBoard, self).__init__(*args, **kw)
-        self.init_config()
-        self.init_Board()
-        
+    def __init__(self, parent, config=None):
+        super(GameBoard, self).__init__(parent)
+        if config is None:
+            self.init_config()
+        else:
+            self.set_config(config)
+    
+        self.init_Board()       
         
     def init_config(self):
-        self.FieldWidth = 10
-        self.FieldHeight = 20
-        
-        self.SquareSize = 20
-    
-        #block colors.
-        #color = [No block, I, O, L, J, S, Z, T, Gray]
-        self.colors = ['#000000',
-                       '#87cefa',
-                       "#ffff00",
-                       "#ffa500",
-                       "#0000ff",
-                       "#00ff00",
-                       "#ff0000",
-                       "#9400d3",
-                       "#a9a9a9"]
-    
-        self.light_colors = ['#000000',
-                             '#add8e6',
-                             "#ffffe0",
-                             "#f0e68c",
-                             "#1e90ff",
-                             "#adff2f",
-                             "#ff6347",
-                             "#ee82ee",
-                             "#f5f5f5"]
-        
-        self.dark_colors = ['#000000', 
-                            "#6495ed",
-                            "#ffd700",
-                            "#cd853f",
-                            "#191970",
-                            "#32cd32",
-                            "#dc143c",
-                            "#8a2be2",
-                            "#696969"]   
-        
-        
         self.config = dict()
-        
         
         #Colors for next blocks.
         color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
@@ -59,13 +24,53 @@ class GameBoard(wx.Panel):
         self.config["colors"] = {color:True for color in color_table}
         
         #This list is used intenally.
-        self.enabled_nexts = [x+1 for x in range(7)]
+        self.enabled_nexts = [x+1 for x in range(7)]            
         
         #Average height of blocks. (-1 to random)
         self.config["height"] = -1
-        
+      
+ 
         
     def init_Board(self):
+        
+        ##internal config
+        self.FieldWidth = 10
+        self.FieldHeight = 20
+    
+        self.SquareSize = 20
+    
+        #block colors.
+        #color = [No block, I, O, L, J, S, Z, T, Gray]
+        self.colors = ['#000000',
+                           '#87cefa',
+                           "#ffff00",
+                           "#ffa500",
+                           "#0000ff",
+                           "#00ff00",
+                           "#ff0000",
+                           "#9400d3",
+                           "#a9a9a9"]
+    
+        self.light_colors = ['#000000',
+                                 '#add8e6',
+                                 "#ffffe0",
+                                 "#f0e68c",
+                                 "#1e90ff",
+                                 "#adff2f",
+                                 "#ff6347",
+                                 "#ee82ee",
+                                 "#f5f5f5"]
+    
+        self.dark_colors = ['#000000', 
+                                "#6495ed",
+                                "#ffd700",
+                                "#cd853f",
+                                "#191970",
+                                "#32cd32",
+                                "#dc143c",
+                                "#8a2be2",
+                                "#696969"]   
+        
 
         self.field = [[0 for x in range(self.FieldWidth)] for y in range(self.FieldHeight)]
         self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
@@ -197,7 +202,7 @@ class GameBoard(wx.Panel):
         #appdate enabled_nexts.
         index = 1
         self.enabled_nexts = []
-        for color in self.config["colors"]:
+        for color in config["colors"]:
             if config["colors"][color] == True:
                 self.enabled_nexts.append(index)
                 
