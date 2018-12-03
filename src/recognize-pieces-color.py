@@ -37,10 +37,9 @@ class ColorPrac(wx.Frame):
         
     def on_config(self, e):
         """run when config button in toolbar."""
-        con_app = wx.App()
+        
         self.config = configwindow.Config(self)
         self.config.Show()
-        con_app.MainLoop()
         
     
     def init_frame(self):
