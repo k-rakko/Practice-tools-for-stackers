@@ -8,7 +8,10 @@ import gameboard
 
 
 # Directory for icons.
-icon_dir = "../icons/"
+
+project_root_dir = os.path.join(os.path.dirname(__name__), "..")
+icon_dir = os.path.join(project_root_dir, "/icons/")
+
 
 
 class ColorPrac(wx.Frame):
