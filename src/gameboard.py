@@ -50,43 +50,27 @@ class GameBoard(wx.Panel):
                            "#ff0000",
                            "#9400d3",
                            "#a9a9a9"]
-    
-        self.light_colors = ['#000000',
-                                 '#add8e6',
-                                 "#ffffe0",
-                                 "#f0e68c",
-                                 "#1e90ff",
-                                 "#adff2f",
-                                 "#ff6347",
-                                 "#ee82ee",
-                                 "#f5f5f5"]
-    
-        self.dark_colors = ['#000000', 
-                                "#6495ed",
-                                "#ffd700",
-                                "#cd853f",
-                                "#191970",
-                                "#32cd32",
-                                "#dc143c",
-                                "#8a2be2",
-                                "#696969"]   
         
 
-        self.field = [[0 for x in range(self.FieldWidth)] for y in range(self.FieldHeight)]
+        self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
+        
+        # TODO: This line should be moved.
         self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
         
 
         
-    def draw_field(self):
-        for y in range(self.FieldHeight):
-            for x in range(self.FieldWidth):
-                self.draw_block(x, y, self.field[y][x])
+    def refresh_field(self):
+        """Refresh entire field."""
+        for x in range(self.FieldHeight * self.FieldWidth):
+            self.draw_square((x % self.FieldWidth) * self.SquareSize,
+                             (x // self.FieldWidth) * self.SquareSize,
+                             self.SquareSize,
+                             self.field[x])
                 
     
     def draw_block(self, x, y, shape):
-        """draw square specified by shape at x, y in board
-        
-        This function draws squrare in 
+        # This function is currentry not used.
+        """draw square at (x, y) in board
         
         Args:
             x (int): offset of square in field. left to right. 
@@ -105,34 +89,19 @@ class GameBoard(wx.Panel):
         
     
         
-    def draw_square(self, x1, y1, x2, y2, shape):
-        """This will draw rectangle x1-x2, y1-y2"""
+    def draw_square(self, x, y, side_length, shape):
+        """Draw rectangle at (x,y). x, y is coordinates of the topleft"""
         
         dc = wx.ClientDC(self)
         
-        pen = wx.Pen(self.light_colors[shape])
-        pen.SetCap(wx.CAP_PROJECTING)
-        dc.SetPen(pen)
-        
-        dc.DrawLine(x1, y1, x1, y1+y2-1)
-        dc.DrawLine(x1, y1, x1+x2-1, y1)
-        
-        self.dark_colorspen = wx.Pen(self.dark_colors[shape])
-        self.dark_colorspen.SetCap(wx.CAP_PROJECTING)
-        dc.SetPen(self.dark_colorspen)
-    
-        dc.DrawLine(x1+1, y1+y2-1, x1+x2-1, y1+y2-1)
-        dc.DrawLine(x1+x2-1, y1+1, x1+x2-1, y1+y2-1)
-        
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.SetBrush(wx.Brush(self.colors[shape]))
-        dc.DrawRectangle(x1+1, y1+1, x2-2, y2-2)   
+        dc.DrawRectangle(x, y, side_length, side_length)   
         
         
     def draw_next(self, shape):
         self.draw_square(12*self.SquareSize,
                          1*self.SquareSize,
-                         int(1.5*self.SquareSize),
                          int(1.5*self.SquareSize),
                          shape)
                
@@ -148,7 +117,7 @@ class GameBoard(wx.Panel):
         
         self.make_new_question()
         
-        self.draw_field()
+        self.refresh_field()
         
         #create new next color.
         next_index = random.randint(0, len(self.enabled_nexts)-1)
@@ -157,45 +126,47 @@ class GameBoard(wx.Panel):
     def make_new_question(self):
         #At now, hole will change at most 1 time.
         
-        #height of garbage block, height where hole change, 
-        #list of hole position.
-        
-        
-      
+        # set average Height of blocks.
         if self.config["height"] == -1:
-            garbage_height = random.randint(0, int(self.FieldHeight * 0.6))
+            garbage_height = random.randint(0, int(self.FieldHeight) - 1)
         else:
             garbage_height = self.config["height"]
         
         height_change = [0, 0, 0, 0, 0, +1, +1, -1, -1, +2, -2]
+        
+        # this list contains list of height of garbage blocks.
         garbage_h_list = []
-        
         for i in range(10):
-            garbage_h_list.append(garbage_height)
             garbage_height += height_change[random.randint(0, len(height_change)-1)]
-            
-            if garbage_height < 0:
-                garbage_height = 0
-            elif garbage_height > 20:
-                garbage_height = 20
+            garbage_h_list.append(garbage_height)
         
+        #hole settings.
         hole_change = random.randint(0, max(0, garbage_height-1))
         hole_positions = [random.randint(0, 9) for x in range(2)]
         
         #make gabage without hole.
         for x in range(self.FieldWidth):
             for y in range(self.FieldHeight):
-                if y <= self.FieldHeight - garbage_h_list[x]:
-                    self.field[y][x] = 0
+                if y <= garbage_h_list[x]:
+                    self.field[self.f_offset(x, y)] = 8
                 else:
-                    self.field[y][x] = 8
+                    self.field[self.f_offset(x, y)] = 0
  
         #create hole.
         for y in range(self.FieldHeight):
-            if self.FieldHeight - y < garbage_height:
-                self.field[y][hole_positions[0]] = 0
+            if y < hole_change:
+                self.field[self.f_offset(hole_positions[0], y)] = 0
             else:
-                self.field[y][hole_positions[1]] = 0
+                self.field[self.f_offset(hole_positions[1], y)] = 0
+                
+    def f_offset(self, x, y, bottom_to_top=True):
+        """Calculate offset of self.field from x, y"""
+        
+        if bottom_to_top:
+            return self.FieldWidth * (self.FieldHeight - 1 - y) + x
+        else:
+            return self.FieldWidth * y + x
+        
     
     def set_config(self, config):
         """setter of self.config"""
