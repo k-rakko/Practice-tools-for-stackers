@@ -30,17 +30,16 @@ class ColorPrac(wx.Frame):
         ctool = toolbar.AddTool(wx.ID_ANY,
                                 "",
                                 wx.Bitmap(os.path.join(icon_dir,
-                                                       "config.ping")))
+                                                       "config.png")))
         toolbar.Realize()
         
         self.Bind(wx.EVT_TOOL, self.on_config, ctool)
         
     def on_config(self, e):
         """run when config button in toolbar."""
-        con_app = wx.App()
+        
         self.config = configwindow.Config(self)
         self.config.Show()
-        con_app.MainLoop()
         
     
     def init_frame(self):
