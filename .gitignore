@@ -1,3 +1,7 @@
+#File for IDE
+*.wpr
+*.wpu
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -24,6 +28,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+/build.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
