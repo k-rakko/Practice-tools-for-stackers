@@ -2,16 +2,16 @@
 
 import os
 import wx
+import pickle
 
 import configwindow
 import gameboard
 
 
-# Directory for icons.
-
-project_root_dir = os.path.join(os.path.dirname(__name__), "..")
-icon_dir = os.path.join(project_root_dir, "/icons/")
-
+# Directory for icons
+project_root_dir = os.path.join(os.path.abspath(os.path.dirname(__name__)), "..")
+icon_dir = os.path.join(project_root_dir, "icons/")
+save_file = os.path.join(project_root_dir, "savedata/userconfig/userconfig.pickle")
 
 
 class ColorPrac(wx.Frame):
@@ -23,7 +23,8 @@ class ColorPrac(wx.Frame):
                           style=wx.DEFAULT_FRAME_STYLE
                                 ^ wx.RESIZE_BORDER
                                 ^ wx.MAXIMIZE_BOX)
-        
+           
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         self.init_frame()
         self.init_ui()
         
@@ -38,6 +39,7 @@ class ColorPrac(wx.Frame):
         
         self.Bind(wx.EVT_TOOL, self.on_config, ctool)
         
+        
     def on_config(self, e):
         """run when config button in toolbar."""
         
@@ -47,10 +49,26 @@ class ColorPrac(wx.Frame):
     
     def init_frame(self):
         
-        self.board = gameboard.GameBoard(self)
+        ##load previous config if exist.        
+        try:
+            with open(save_file, mode="rb") as f:
+                config = pickle.load(f)
+        except (FileNotFoundError, EOFError):
+            config = None        
+        
+        
+        self.board = gameboard.GameBoard(self, config)
         self.board.SetFocus()
         
         self.SetTitle("Next Color Practice")
+        
+    def on_close(self, Event):
+        """Executed when window is closed. Save config."""
+        with open(save_file, "wb") as f:
+            pickle.dump(self.board.get_config(), f)
+            
+        self.Destroy()
+
 
 def main():
     app = wx.App()

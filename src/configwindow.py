@@ -8,13 +8,13 @@ class Config(wx.Frame):
                           parent,
                           style=wx.DEFAULT_DIALOG_STYLE)
         
-        self.board = parent.board
+        self.parent = parent
         self.init_ui()
         self.Center()
         
     def init_ui(self):
         
-        config = self.board.get_config()
+        config = self.parent.board.get_config()
         
         top_sizer = wx.BoxSizer(wx.VERTICAL)
         
@@ -81,7 +81,7 @@ class Config(wx.Frame):
         
         #if checked == False, no box is checked so need to alert and return.
         if True in config["colors"].values():
-            self.board.set_config(config)
+            self.parent.board.set_config(config)
             self.Close()
         else:
             dial = wx.MessageDialog(None,
