@@ -13,82 +13,52 @@ class Config(wx.Frame):
         
     def init_ui(self):
         
-        self.config = self.board.get_config()
+        config = self.board.get_config()
         
-        panel = wx.Panel(self, wx.ID_ANY)
-        sizer = wx.GridBagSizer(2, 12)
-        grid_y = 0
+        toppanel = wx.Panel(self, wx.ID_ANY)
+        topsizer = wx.BoxSizer(wx.VERTICAL)
         
         
-        ##Color variation setting.
-        self.col_check_list = []
-        c_text = wx.StaticText(panel, wx.ID_ANY, "Colors")
-        sizer.Add(c_text, pos=(grid_y, 0))
-        grid_y += 1
+        #Color variation setting.
+        self.colorconf = ColorConf(self, config["colors"])
+        topsizer.Add(self.colorconf, 0, wx.EXPAND)         
         
-       
-        
-        for color in self.config["colors"]:
-            checkbox = wx.CheckBox(panel, wx.ID_ANY, color)
-            checkbox.SetValue(self.config["colors"][color])
-            sizer.Add(checkbox, pos=(grid_y, 0))
-            self.col_check_list.append((color, checkbox))
-            grid_y += 1
                        
-        ##config about average height.
-        grid_y += 1
-        h_text = wx.StaticText(panel,
-                               wx.ID_ANY,
-                               "Average height of garbage blocks.\n(-1 to random)")
-        sizer.Add(h_text, pos=(grid_y, 0))
-        grid_y += 1
+        #config about average height.
+        self.heightconf = HeightConf(self, config["height"])
+        topsizer.Add(self.heightconf, 0, wx.EXPAND)
         
+        #Save and cancel config Button
+        self.savebuttons = SaveButtons(self)
+        topsizer.Add(self.savebuttons, 0, wx.EXPAND)
         
-        self.h_spin = wx.SpinCtrl(panel, min=-1, max=20, style=wx.SP_ARROW_KEYS)
-        
-        self.h_spin.SetValue(self.config["height"])
-        sizer.Add(self.h_spin, pos=(grid_y, 0))
-        grid_y += 1
+        self.SetSizerAndFit(topsizer)
         
         
         
-        
-        ##Save and cancel config Button
-        grid_y += 1
-        s_button = wx.Button(panel, wx.ID_ANY, "Save")
-        can_button = wx.Button(panel, wx.ID_ANY, "Cancel")
-        
-        s_button.Bind(wx.EVT_BUTTON, self.on_click_save, s_button)
-        can_button.Bind(wx.EVT_BUTTON, self.on_click_cancel, can_button)
-            
-        sizer.Add(s_button, pos=(grid_y, 0))
-        sizer.Add(can_button, pos=(grid_y, 1))
-        
-        
-        #Sizer
-        panel.SetSizer(sizer)
         
         #General Frame setting
-        self.SetSize((300, 500))
+        # self.SetSize((400, 400))
         self.Center()
         
         
-    def on_click_save(self, e):
+        
+        
+    def save_config(self, e):
         """Launched when save button pressed."""
-        ##Color setting
-        checked = False
-        for color, checkbox in self.col_check_list:
-            conf = checkbox.GetValue()
-            self.config["colors"][color] = conf
-            if conf:
-                checked = True
+        
+        config = dict()
+        
+        #Color setting
+        config["colors"] = self.colorconf.get_state()
+        
                 
         ##Average height setting
-        self.config["height"] = self.h_spin.GetValue()
+        config["height"] = self.heightconf.get_state()
         
-        #if checked == False, no box is checked so need to alert and return.
-        if checked:
-            self.board.set_config(self.config)
+        #if no colors are checked, alert and return config menu.
+        if True in config["colors"].values():
+            self.board.set_config(config)
             self.Close()
         else:
             dial = wx.MessageDialog(None,
@@ -97,7 +67,104 @@ class Config(wx.Frame):
                                     wx.OK)
             dial.ShowModal()
             
-    def on_click_cancel(self, e):
+    def cancel_config(self, e):
         """Launched when cancel button pressed."""
         self.Close()
 
+
+class ColorConf(wx.Panel):
+    """Config checkboxes for color config"""
+    
+    def __init__(self, parent, colors):
+        """Constructor
+        
+        Args:
+            parent: parent Frame.
+            colors: dict of colorname:bool for initial setting of checkbox
+        """
+        super().__init__(parent, wx.ID_ANY)
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        #Print "Colors"
+        c_text = wx.StaticText(self, wx.ID_ANY, "colors")
+        sizer.Add(c_text)
+        
+        #Make checkboxes.
+        self.col_check_list = []
+        for color in colors:
+            checkbox = wx.CheckBox(self, wx.ID_ANY, color)
+            checkbox.SetValue(colors[color])
+            sizer.Add(checkbox, 1, wx.EXPAND)
+            self.col_check_list.append((color, checkbox))
+            
+        self.SetSizer(sizer)
+                  
+    def get_state(self):
+        """return state of checkboxes.
+        
+        This returns dict object.
+          keys: colorname of checkbox
+          val: Ture if checked.
+        """
+        
+        state = dict()
+        for color, checkbox in self.col_check_list:
+            conf = checkbox.GetValue()
+            state[color] = conf
+            
+        return state
+     
+    
+class HeightConf(wx.Panel):
+    """config panel for Height."""
+    def __init__(self, parent, current_height):
+        super().__init__(parent, wx.ID_ANY)
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        #print description of height config.
+        h_text = wx.StaticText(self,
+                               wx.ID_ANY,
+                               "Average height of garbage blocks.\n"
+                                   "(-1 to random)")
+        
+        sizer.Add(h_text)
+        
+        #spinctrl
+        self.h_spin = wx.SpinCtrl(self, min=-1, max=20, style=wx.SP_ARROW_KEYS)
+        self.h_spin.SetValue(current_height)
+        sizer.Add(self.h_spin, 1, wx.EXPAND)
+        
+        self.SetSizer(sizer)
+    
+    def get_state(self):
+        return self.h_spin.GetValue()
+    
+        
+
+class SaveButtons(wx.Panel):
+    """Save config and cancel buttons."""
+    
+    def __init__(self, parent):
+        super().__init__(parent, wx.ID_ANY)
+        
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        s_button = wx.Button(self, wx.ID_ANY, "Save")
+        can_button = wx.Button(self, wx.ID_ANY, "Cancel")
+        
+        s_button.Bind(wx.EVT_BUTTON, parent.save_config, s_button)
+        can_button.Bind(wx.EVT_BUTTON, parent.cancel_config, can_button)
+            
+        sizer.Add(s_button)
+        sizer.Add(can_button)
+        
+        self.SetSizer(sizer)
+        
+
+        
+    
+    
+    
+           

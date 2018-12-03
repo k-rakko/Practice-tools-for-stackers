@@ -30,7 +30,7 @@ class ColorPrac(wx.Frame):
         ctool = toolbar.AddTool(wx.ID_ANY,
                                 "",
                                 wx.Bitmap(os.path.join(icon_dir,
-                                                       "config.ping")))
+                                                       "config.png")))
         toolbar.Realize()
         
         self.Bind(wx.EVT_TOOL, self.on_config, ctool)
