@@ -1,4 +1,4 @@
-#File for IDE
+#File for other metadata
 *.wpr
 *.wpu
 
@@ -28,7 +28,6 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
-/build.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
