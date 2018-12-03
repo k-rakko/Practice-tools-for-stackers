@@ -25,7 +25,7 @@ class ColorPrac(wx.Frame):
                                 ^ wx.MAXIMIZE_BOX)
            
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.init_frame()
+        self.init_board()
         self.init_ui()
         
     def init_ui(self):
@@ -47,7 +47,7 @@ class ColorPrac(wx.Frame):
         self.config.Show()
         
     
-    def init_frame(self):
+    def init_board(self):
         
         ##load previous config if exist.        
         try:

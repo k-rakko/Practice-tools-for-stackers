@@ -13,7 +13,7 @@ class GameBoard(wx.Panel):
         else:
             self.set_config(config)
     
-        self.init_Board()       
+        self.init_boad_data()       
         
     def init_config(self):
         self.config = dict()
@@ -31,7 +31,7 @@ class GameBoard(wx.Panel):
       
  
         
-    def init_Board(self):
+    def init_boad_data(self):
         
         ##internal config
         self.FieldWidth = 10
