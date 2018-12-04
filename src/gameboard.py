@@ -35,15 +35,17 @@ class GameBoard(wx.Panel):
             
             self.config[self.key_colors] = {color:True for color in color_table}
             
-        
-        elif not self.key_height in self.config.keys():
+        if not self.key_height in self.config.keys():
             #Average height of blocks. (-1 to random)
             self.config[self.key_height] = -1
+        if not self.key_next in self.config.keys():
+            self.config[self.key_next] = 1
+        if not self.key_colful in self.config.keys():
+            self.config[self.key_colful] = True
         
-       
-        #This list is used intenally.
-        self.enabled_nexts = [x+1 for x in range(7)]            
         
+        # Update self.enabled_nexts
+        self.set_config(self.config)
         
     def init_boad_data(self):
         """Internal config"""
@@ -70,9 +72,13 @@ class GameBoard(wx.Panel):
 
         self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
         
+        self.nextbag = [x + 1 for x in range(7)]
+        
         # keys for config dictionary
         self.key_height = "height"
         self.key_colors = "colors"
+        self.key_next = "next"
+        self.key_colful = "colorful_next"        
         
     def refresh_field(self):
         """Refresh entire field."""
@@ -114,10 +120,10 @@ class GameBoard(wx.Panel):
         dc.DrawRectangle(x, y, side_length, side_length)   
         
         
-    def draw_next(self, shape):
+    def draw_next(self, number, shape):
         self.draw_square(12*self.SquareSize,
-                         1*self.SquareSize,
-                         int(1.5*self.SquareSize),
+                         int(self.SquareSize * 3.5 * number) , 
+                         int(2*self.SquareSize),
                          shape)
                
         
@@ -134,10 +140,22 @@ class GameBoard(wx.Panel):
         
         self.refresh_field()
         
-        #create new next color.
+        #Draw next
         next_index = random.randint(0, len(self.enabled_nexts)-1)
-        self.draw_next(self.enabled_nexts[next_index])
+        self.draw_next(0, self.enabled_nexts[next_index])
         
+        #create new next color fro additional next.
+        for number in range(self.config[self.key_next] - 1):
+            if self.config[self.key_colful]:
+                next_index = random.randint(0, len(self.nextbag) - 1)
+                self.draw_next(number+1, self.nextbag.pop(next_index))
+                if len(self.nextbag) == 0:
+                    self.nextbag = [x + 1 for x in range(0, 7)]
+                
+            else:
+                next_index = random.randint(0, len(self.enabled_nexts)-1)
+                self.draw_next(number, self.enabled_nexts[next_index])
+            
     def make_new_question(self):
         #At now, hole will change at most 1 time.
         

@@ -13,6 +13,8 @@ class Config(wx.Frame):
         # keys for config dictionary.
         self.key_colors = "colors"
         self.key_height = "height"
+        self.key_next = "next"
+        self.key_colful = "colorful_next"
         
         self.init_ui()
         self.Center()
@@ -41,8 +43,8 @@ class Config(wx.Frame):
         height_sizer = wx.BoxSizer(wx.VERTICAL)
         
         h_text = wx.StaticText(self,
-                               wx.ID_ANY,
-                               "Average height of garbage blocks.\n(-1 to random)")
+                               wx.ID_ANY, 
+                               "Average height of garbage blocks. (-1 to random)")
         height_sizer.Add(h_text)
         
         
@@ -50,6 +52,36 @@ class Config(wx.Frame):
         
         self.h_spin.SetValue(config[self.key_height])
         height_sizer.Add(self.h_spin)
+        
+        
+        ##Config about next.
+        next_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        next_text = wx.StaticText(self,
+                               wx.ID_ANY,
+                               "Number of next to display")
+        next_sizer.Add(next_text, 0, wx.ALL, 5)
+        
+        #Number of next.
+        self.next_spin = wx.SpinCtrl(self, min=1, max=6, style=wx.SP_ARROW_KEYS)
+        
+        self.next_spin.SetValue(config[self.key_next])
+        next_sizer.Add(self.next_spin, 0, wx.ALL, 5)        
+        
+        # If checked, This will convert unchecked color
+        # for second and lator of nexts.
+        colorful_rtext = "Use unchecked colors for second and later of next."
+        
+        coloful_text = wx.StaticText(self,
+                                     wx.ID_ANY,
+                                     colorful_rtext)
+        next_sizer.Add(coloful_text, 0)
+        
+        self.colorful_checkbox = wx.CheckBox(self, wx.ID_ANY, "")
+        self.colorful_checkbox.SetValue(config[self.key_colful])
+        next_sizer.Add(self.colorful_checkbox,  0)
+        
+        
         
         
         ##Save and cancel config Button
@@ -66,6 +98,7 @@ class Config(wx.Frame):
         
         top_sizer.Add(color_sizer, 0, wx.ALL, 5)
         top_sizer.Add(height_sizer, 0, wx.ALL, 5)
+        top_sizer.Add(next_sizer, 0, wx.ALL, 5)
         top_sizer.Add(save_sizer, 0, wx.ALL, 5)
         
         self.SetSizerAndFit(top_sizer)
@@ -83,6 +116,8 @@ class Config(wx.Frame):
                 
         ##Average height setting
         config[self.key_height] = self.h_spin.GetValue()
+        config[self.key_next] = self.next_spin.GetValue()
+        config[self.key_colful] = self.colorful_checkbox.GetValue()
         
         #if checked == False, no box is checked so need to alert and return.
         if True in config[self.key_colors].values():
