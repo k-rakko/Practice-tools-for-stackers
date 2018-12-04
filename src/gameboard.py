@@ -9,6 +9,8 @@ class GameBoard(wx.Panel):
     def __init__(self, parent, config=None):
         super(GameBoard, self).__init__(parent)
         
+        self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
+        
         #Internal configs
         self.init_boad_data()
         
@@ -18,8 +20,6 @@ class GameBoard(wx.Panel):
         else:
             self.set_config(config)
     
-        
-        
     def init_config(self):
         self.config = dict()
         
@@ -33,8 +33,6 @@ class GameBoard(wx.Panel):
         
         #Average height of blocks. (-1 to random)
         self.config["height"] = -1
-      
- 
         
     def init_boad_data(self):
         """Internal config"""
@@ -60,11 +58,6 @@ class GameBoard(wx.Panel):
         
 
         self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
-        
-        # TODO: This line should be moved.
-        self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
-        
-
         
     def refresh_field(self):
         """Refresh entire field."""
