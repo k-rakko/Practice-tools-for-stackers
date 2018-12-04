@@ -11,28 +11,39 @@ class GameBoard(wx.Panel):
         
         self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
         
-        #Internal configs
+        #Internal config
         self.init_boad_data()
         
-        #set user config if exist.
-        if config is None:
-            self.init_config()
-        else:
-            self.set_config(config)
+        #set user configs if exist and set default config if doesn't exist.
+        self.config = config
+        self.init_config(config)
     
-    def init_config(self):
-        self.config = dict()
+    def init_config(self, config):
+        if config is None or not type(config) is dict:
+            self.config = dict()
+            
         
-        #Colors for next blocks.
-        color_table = ["Cyan", "Orange", "Yellow", "Red", "Purple", "Blue", "Green"]
+        if not self.key_colors in self.config.keys():
+            #Colors for next blocks.
+            color_table = ["Cyan",
+                           "Orange",
+                           "Yellow",
+                           "Red",
+                           "Purple",
+                           "Blue",
+                           "Green"]
+            
+            self.config[self.key_colors] = {color:True for color in color_table}
+            
         
-        self.config["colors"] = {color:True for color in color_table}
+        elif not self.key_height in self.config.keys():
+            #Average height of blocks. (-1 to random)
+            self.config[self.key_height] = -1
         
+       
         #This list is used intenally.
         self.enabled_nexts = [x+1 for x in range(7)]            
         
-        #Average height of blocks. (-1 to random)
-        self.config["height"] = -1
         
     def init_boad_data(self):
         """Internal config"""
@@ -58,6 +69,10 @@ class GameBoard(wx.Panel):
         
 
         self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
+        
+        # keys for config dictionary
+        self.key_height = "height"
+        self.key_colors = "colors"
         
     def refresh_field(self):
         """Refresh entire field."""
@@ -127,10 +142,10 @@ class GameBoard(wx.Panel):
         #At now, hole will change at most 1 time.
         
         # set average Height of blocks.
-        if self.config["height"] == -1:
+        if self.config[self.key_height] == -1:
             garbage_height = random.randint(0, int(self.FieldHeight) - 1)
         else:
-            garbage_height = self.config["height"]
+            garbage_height = self.config[self.key_height]
         
         height_change = [0, 0, 0, 0, 0, +1, +1, -1, -1, +2, -2]
         
@@ -173,8 +188,8 @@ class GameBoard(wx.Panel):
         #appdate enabled_nexts.
         index = 1
         self.enabled_nexts = []
-        for color in config["colors"]:
-            if config["colors"][color] == True:
+        for color in config[self.key_colors]:
+            if config[self.key_colors][color] == True:
                 self.enabled_nexts.append(index)
                 
             index += 1
