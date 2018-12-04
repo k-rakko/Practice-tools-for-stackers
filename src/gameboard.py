@@ -8,18 +8,23 @@ class GameBoard(wx.Panel):
     """panel for block field and next."""
     def __init__(self, parent, config=None):
         super(GameBoard, self).__init__(parent)
+        
+        #Internal configs
+        self.init_boad_data()
+        
+        #set user config if exist.
         if config is None:
             self.init_config()
         else:
             self.set_config(config)
     
-        self.init_boad_data()       
+        
         
     def init_config(self):
         self.config = dict()
         
         #Colors for next blocks.
-        color_table = ["Cyan", "Yellow", "Orange", "Blue", "Green", "Red", "Purple"]
+        color_table = ["Cyan", "Orange", "Yellow", "Red", "Purple", "Blue", "Green"]
         
         self.config["colors"] = {color:True for color in color_table}
         
@@ -32,24 +37,26 @@ class GameBoard(wx.Panel):
  
         
     def init_boad_data(self):
-        
-        ##internal config
+        """Internal config"""
         self.FieldWidth = 10
         self.FieldHeight = 20
     
         self.SquareSize = 20
+        
+        self.shape_noblock = 0
+        self.shape_gray = 8
     
         #block colors.
-        #color = [No block, I, O, L, J, S, Z, T, Gray]
-        self.colors = ['#000000',
-                           '#87cefa',
-                           "#ffff00",
-                           "#ffa500",
-                           "#0000ff",
-                           "#00ff00",
-                           "#ff0000",
-                           "#9400d3",
-                           "#a9a9a9"]
+        #color = [No block, I, L, O, J, S, Z, T, Gray]
+        self.colors = ['#000000', # No block
+                           '#87cefa', # I
+                           "#ffa500", # L
+                           "#ffff00", # O
+                           "#ff0000", # Z
+                           "#9400d3", # T
+                           "#0000ff", # J
+                           "#00ff00", # S
+                           "#a9a9a9"] # Gray
         
 
         self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
@@ -148,16 +155,16 @@ class GameBoard(wx.Panel):
         for x in range(self.FieldWidth):
             for y in range(self.FieldHeight):
                 if y <= garbage_h_list[x]:
-                    self.field[self.f_offset(x, y)] = 8
+                    self.field[self.f_offset(x, y)] = self.shape_gray
                 else:
-                    self.field[self.f_offset(x, y)] = 0
+                    self.field[self.f_offset(x, y)] = self.shape_noblock
  
         #create hole.
         for y in range(self.FieldHeight):
             if y < hole_change:
-                self.field[self.f_offset(hole_positions[0], y)] = 0
+                self.field[self.f_offset(hole_positions[0], y)] = self.shape_noblock
             else:
-                self.field[self.f_offset(hole_positions[1], y)] = 0
+                self.field[self.f_offset(hole_positions[1], y)] = self.shape_noblock
                 
     def f_offset(self, x, y, bottom_to_top=True):
         """Calculate offset of self.field from x, y"""
