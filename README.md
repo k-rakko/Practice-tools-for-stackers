@@ -6,7 +6,7 @@ This is practice tools for Tetris-like Block game written in python.
 
 ## Demo
 You can practice recognizing color in the next box.   
-![Demo GIF animation](https://github.com/k-rakko/recognize-pieces-color/media/demo.gif)    
+![Demo GIF animation](https://github.com/k-rakko/recognize-pieces-color/blob/master/media/demo.gif)    
 
 ### Requirement
 - python 3.x
