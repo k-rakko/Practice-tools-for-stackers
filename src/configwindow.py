@@ -9,6 +9,11 @@ class Config(wx.Frame):
                           style=wx.DEFAULT_DIALOG_STYLE)
         
         self.parent = parent
+        
+        # keys for config dictionary.
+        self.key_colors = "colors"
+        self.key_height = "height"
+        
         self.init_ui()
         self.Center()
         
@@ -26,9 +31,9 @@ class Config(wx.Frame):
         color_sizer.Add(c_text)
                 
         self.col_check_list = []
-        for color in config["colors"]:
+        for color in config[self.key_colors]:
             checkbox = wx.CheckBox(self, wx.ID_ANY, color)
-            checkbox.SetValue(config["colors"][color])
+            checkbox.SetValue(config[self.key_colors][color])
             color_sizer.Add(checkbox)
             self.col_check_list.append((color, checkbox))
                        
@@ -43,7 +48,7 @@ class Config(wx.Frame):
         
         self.h_spin = wx.SpinCtrl(self, min=-1, max=20, style=wx.SP_ARROW_KEYS)
         
-        self.h_spin.SetValue(config["height"])
+        self.h_spin.SetValue(config[self.key_height])
         height_sizer.Add(self.h_spin)
         
         
@@ -71,16 +76,16 @@ class Config(wx.Frame):
         ##Color setting
         config = dict()
         
-        config["colors"] = dict()
+        config[self.key_colors] = dict()
         for color, checkbox in self.col_check_list:
             conf = checkbox.GetValue()
-            config["colors"][color] = conf
+            config[self.key_colors][color] = conf
                 
         ##Average height setting
-        config["height"] = self.h_spin.GetValue()
+        config[self.key_height] = self.h_spin.GetValue()
         
         #if checked == False, no box is checked so need to alert and return.
-        if True in config["colors"].values():
+        if True in config[self.key_colors].values():
             self.parent.board.set_config(config)
             self.Close()
         else:
