@@ -9,7 +9,7 @@ import gameboard
 
 
 # Directory for icons
-project_root_dir = os.path.join(os.path.abspath(os.path.dirname(__name__)), "..")
+project_root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..")
 icon_dir = os.path.join(project_root_dir, "icons/")
 save_file = os.path.join(project_root_dir, "config/userconfig.pickle")
 
