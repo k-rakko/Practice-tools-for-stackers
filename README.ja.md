@@ -29,7 +29,7 @@ pip3 install wxpython
 ```
 
 ## 起動方法
-まず、[ここ](https://github.com/k-rakko/recognize-pieces-color/archive/master.zip)をクリックしてダウンロードしてください。(git でclone してもおーけー)    
+まず、[ここ](https://github.com/k-rakko/recognize-pieces-color/archive/master.zip)をクリックしてファイルをダウンロードしてください。(git でclone してもおーけー)    
 zip解凍後にlaunchersに移動して、windowsなら"recognize-piece-color.bat"を、それ以外のOSでは.shのほうをダブルクリックすれば起動するはずです。（多分。起動しなかったら[@rikurakko](https://twitter.com/rikurakko)に文句をいってください。）
 
 
@@ -37,8 +37,11 @@ zip解凍後にlaunchersに移動して、windowsなら"recognize-piece-color.ba
 スペースキーで開始、さらにスペースキーで次の問題を表示します。以上です。  
 もしコンフィグをしたければスパナマークをクリックしてください。  以下の項目を設定できます。
 
-設定項目
 - どの色を出現させるか  
 - ゴミブロックの平均の高さをいくつにするか  
 - ネクストをいくつにするか  
 - 二つ目以降のネクストはカラフルにするか否か （しないと2色とかで練習するときネクスト欄が悲惨になります）
+
+## バグレポート
+強制終了やうまく起動しないなどあったら、[@rikurakko](https://twitter.com/rikurakko) まで連絡するかissueに書いてくれると助かります。
+

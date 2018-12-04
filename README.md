@@ -30,6 +30,9 @@ pip3 install wxpython
 ```
 
 ## How to launch?
+Click [here](https://github.com/k-rakko/recognize-pieces-color/archive/master.zip) to download zip file and....
+
+
 #### Windows
 Go to "launchers" folder and double-click "recognize-pieces-color.bat"
 
