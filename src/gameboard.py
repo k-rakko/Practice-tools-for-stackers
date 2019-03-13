@@ -11,44 +11,7 @@ class GameBoard(wx.Panel):
         
         self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
         
-        #Internal config
-        self.init_boad_data()
-        
-        #set user configs if exist and set default config if doesn't exist.
-        self.config = config
-        self.init_config(config)
-    
-    def init_config(self, config):
-        if config is None or not type(config) is dict:
-            self.config = dict()
-            
-        
-        if not self.key_colors in self.config.keys():
-            #Colors for next blocks.
-            color_table = ["Cyan",
-                           "Orange",
-                           "Yellow",
-                           "Red",
-                           "Purple",
-                           "Blue",
-                           "Green"]
-            
-            self.config[self.key_colors] = {color:True for color in color_table}
-            
-        if not self.key_height in self.config.keys():
-            #Average height of blocks. (-1 to random)
-            self.config[self.key_height] = -1
-        if not self.key_next in self.config.keys():
-            self.config[self.key_next] = 1
-        if not self.key_colful in self.config.keys():
-            self.config[self.key_colful] = True
-        
-        
-        # Update self.enabled_nexts
-        self.set_config(self.config)
-        
-    def init_boad_data(self):
-        """Internal config"""
+        ##init_boad_data
         self.FieldWidth = 10
         self.FieldHeight = 20
     
@@ -78,15 +41,40 @@ class GameBoard(wx.Panel):
         self.key_height = "height"
         self.key_colors = "colors"
         self.key_next = "next"
-        self.key_colful = "colorful_next"        
+        self.key_colful = "colorful_next"          
         
-    def refresh_field(self):
-        """Refresh entire field."""
-        for x in range(self.FieldHeight * self.FieldWidth):
-            self.draw_square((x % self.FieldWidth) * self.SquareSize,
-                             (x // self.FieldWidth) * self.SquareSize,
-                             self.SquareSize,
-                             self.field[x])
+        ##set user configs if exist and set default config if doesn't exist.
+        self.config = config
+        if config is None or not type(config) is dict:
+            self.config = dict()
+            
+        
+        if not self.key_colors in self.config.keys():
+            #Colors for next blocks.
+            color_table = ["Cyan",
+                           "Orange",
+                           "Yellow",
+                           "Red",
+                           "Purple",
+                           "Blue",
+                           "Green"]
+            
+            self.config[self.key_colors] = {color:True for color in color_table}
+            
+        if not self.key_height in self.config.keys():
+            #Average height of blocks. (-1 to random)
+            self.config[self.key_height] = -1
+        if not self.key_next in self.config.keys():
+            self.config[self.key_next] = 1
+        if not self.key_colful in self.config.keys():
+            self.config[self.key_colful] = True
+        
+        
+        # Update self.enabled_nexts
+        self.set_config(self.config)
+        
+              
+        
                 
     
     def draw_block(self, x, y, shape):
@@ -135,28 +123,7 @@ class GameBoard(wx.Panel):
             self.show_new_question()
             
     def show_new_question(self):
-        
-        self.make_new_question()
-        
-        self.refresh_field()
-        
-        #Draw next
-        next_index = random.randint(0, len(self.enabled_nexts)-1)
-        self.draw_next(0, self.enabled_nexts[next_index])
-        
-        #create new next color fro additional next.
-        for number in range(self.config[self.key_next] - 1):
-            if self.config[self.key_colful]:
-                next_index = random.randint(0, len(self.nextbag) - 1)
-                self.draw_next(number+1, self.nextbag.pop(next_index))
-                if len(self.nextbag) == 0:
-                    self.nextbag = [x + 1 for x in range(0, 7)]
-                
-            else:
-                next_index = random.randint(0, len(self.enabled_nexts)-1)
-                self.draw_next(number, self.enabled_nexts[next_index])
-            
-    def make_new_question(self):
+        ##Make new question.
         #At now, hole will change at most 1 time.
         
         # set average Height of blocks.
@@ -190,7 +157,34 @@ class GameBoard(wx.Panel):
             if y < hole_change:
                 self.field[self.f_offset(hole_positions[0], y)] = self.shape_noblock
             else:
-                self.field[self.f_offset(hole_positions[1], y)] = self.shape_noblock
+                self.field[self.f_offset(hole_positions[1], y)] = self.shape_noblock        
+        
+        
+        ##Refresh entire field
+        for x in range(self.FieldHeight * self.FieldWidth):
+            self.draw_square((x % self.FieldWidth) * self.SquareSize,
+                             (x // self.FieldWidth) * self.SquareSize,
+                             self.SquareSize,
+                             self.field[x])
+        
+        
+        #Draw next
+        next_index = random.randint(0, len(self.enabled_nexts)-1)
+        self.draw_next(0, self.enabled_nexts[next_index])
+        
+        #create new next color fro additional next.
+        for number in range(self.config[self.key_next] - 1):
+            if self.config[self.key_colful]:
+                next_index = random.randint(0, len(self.nextbag) - 1)
+                self.draw_next(number+1, self.nextbag.pop(next_index))
+                if len(self.nextbag) == 0:
+                    self.nextbag = [x + 1 for x in range(0, 7)]
+                
+            else:
+                next_index = random.randint(0, len(self.enabled_nexts)-1)
+                self.draw_next(number, self.enabled_nexts[next_index])
+            
+
                 
     def f_offset(self, x, y, bottom_to_top=True):
         """Calculate offset of self.field from x, y"""

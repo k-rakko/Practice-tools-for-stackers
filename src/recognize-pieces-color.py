@@ -25,11 +25,22 @@ class ColorPrac(wx.Frame):
                                 ^ wx.MAXIMIZE_BOX)
            
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.init_board()
-        self.init_ui()
         
-    def init_ui(self):
+        ##init board.
+        #load previous config if exist.        
+        try:
+            with open(save_file, mode="rb") as f:
+                config = pickle.load(f)
+        except (FileNotFoundError, EOFError):
+            config = None        
         
+        
+        self.board = gameboard.GameBoard(self, config)
+        self.board.SetFocus()
+        
+        self.SetTitle("Next Color Practice")        
+        
+        ##init UI
         toolbar = self.CreateToolBar()
         ctool = toolbar.AddTool(wx.ID_ANY,
                                 "",
@@ -47,20 +58,7 @@ class ColorPrac(wx.Frame):
         self.config.Show()
         
     
-    def init_board(self):
-        
-        ##load previous config if exist.        
-        try:
-            with open(save_file, mode="rb") as f:
-                config = pickle.load(f)
-        except (FileNotFoundError, EOFError):
-            config = None        
-        
-        
-        self.board = gameboard.GameBoard(self, config)
-        self.board.SetFocus()
-        
-        self.SetTitle("Next Color Practice")
+
         
     def on_close(self, Event):
         """Executed when window is closed. Save config."""
