@@ -11,6 +11,8 @@ class GameBoard(wx.Panel):
         
         self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
         
+        self.parent = parent
+        
         ##init_boad_data
         self.FieldWidth = 10
         self.FieldHeight = 20
@@ -116,7 +118,7 @@ class GameBoard(wx.Panel):
                
         
     def on_key_down(self, event):
-        
+        self.parent.inc_counter()
         keycode = event.GetKeyCode()
         
         if keycode == wx.WXK_SPACE:
