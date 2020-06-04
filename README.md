@@ -1,7 +1,7 @@
 # recognize-pieces-color
 
 ## Overview
-If you are NOT serious block game player, this DOESN'T makes any sense.
+This program DOESN'T makes any sense if you are NOT serious block game player. 
 This is practice tools for Tetris-like Block game written in python.
 
 ## Demo
