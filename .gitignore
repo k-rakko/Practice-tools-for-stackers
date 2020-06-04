@@ -1,6 +1,7 @@
 #File for other metadata
 *.wpr
 *.wpu
+*.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
