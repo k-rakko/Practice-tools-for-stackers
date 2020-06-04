@@ -43,7 +43,9 @@ class GameBoard(wx.Panel):
         self.key_height = "height"
         self.key_colors = "colors"
         self.key_next = "next"
-        self.key_colful = "colorful_next"          
+        self.key_colful = "colorful_next"
+        self.key_blind_num = "blind_num"
+        self.key_blind = "blind"
         
         ##set user configs if exist and set default config if doesn't exist.
         self.config = config
