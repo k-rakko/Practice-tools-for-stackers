@@ -14,6 +14,8 @@ class Config(wx.Frame):
         self.key_colors = "colors"
         self.key_height = "height"
         self.key_next = "next"
+        self.key_blind_num = "blind_num"
+        self.key_blind = "blind"
         
         self.init_ui()
         self.Center()
@@ -66,6 +68,28 @@ class Config(wx.Frame):
         
         self.next_spin.SetValue(config[self.key_next])
         next_sizer.Add(self.next_spin, 0, wx.ALL, 5)        
+        ## Blind mode.
+        blind_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        blind_rtext = "Blind mode: Update next without changing field."
+        blind_text = wx.StaticText(self,
+                                   wx.ID_ANY,
+                                   blind_rtext)
+        blind_sizer.Add(blind_text, 0)
+        # enable or disable
+
+        self.blind_checkbox = wx.CheckBox(self, wx.ID_ANY, "")
+        self.blind_checkbox.SetValue(config[self.key_blind])
+        blind_sizer.Add(self.blind_checkbox, 0)
+        # how many times update next without updateing field.
+
+
+        self.blind_spin = wx.SpinCtrl(self, min=0, max=99, style=wx.SP_ARROW_KEYS)
+        self.blind_spin.SetValue(config[self.key_blind_num])
+        blind_sizer.Add(self.blind_spin, 0)
+        
+
+
         ##Save and cancel config Button
         save_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -81,6 +105,7 @@ class Config(wx.Frame):
         top_sizer.Add(color_sizer, 0, wx.ALL, 5)
         top_sizer.Add(height_sizer, 0, wx.ALL, 5)
         top_sizer.Add(next_sizer, 0, wx.ALL, 5)
+        top_sizer.Add(blind_sizer, 0, wx.ALL, 5)
         top_sizer.Add(save_sizer, 0, wx.ALL, 5)
         
         self.SetSizerAndFit(top_sizer)
@@ -99,6 +124,8 @@ class Config(wx.Frame):
         ##Average height setting
         config[self.key_height] = self.h_spin.GetValue()
         config[self.key_next] = self.next_spin.GetValue()
+        config[self.key_blind] = self.blind_checkbox.GetValue()
+        config[self.key_blind_num] = self.blind_spin.GetValue()
         
         #if checked == False, no box is checked so need to alert and return.
         if True in config[self.key_colors].values():
@@ -114,6 +141,4 @@ class Config(wx.Frame):
     def on_click_cancel(self, e):
         """Launched when cancel button pressed."""
         self.Close()
-        
-    
-           
+
