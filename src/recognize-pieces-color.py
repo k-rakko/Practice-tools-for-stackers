@@ -13,7 +13,6 @@ project_root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), ".."
 icon_dir = os.path.join(project_root_dir, "icons/")
 save_file = os.path.join(project_root_dir, "config/userconfig.pickle")
 
-
 class ColorPrac(wx.Frame):
     """Main window class."""
     def __init__(self, parent):
@@ -26,7 +25,7 @@ class ColorPrac(wx.Frame):
            
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
-        ##init board.
+        #init board.
         #load previous config if exist.        
         try:
             with open(save_file, mode="rb") as f:
@@ -34,18 +33,16 @@ class ColorPrac(wx.Frame):
         except (FileNotFoundError, EOFError):
             config = dict()
             
-        ##Read config about counter
+        #Read config about counter
         self.Ctotal = config.get("Ctotal", 0)
         self.Ccurrent = 0
-        
-        
+
         self.board = gameboard.GameBoard(self, config)
         self.board.SetFocus()
         
         self.SetTitle("Next Color Practice")        
-        
-        
-        ##init UI
+
+        #init UI
         self.sb = self.CreateStatusBar()
         self.sb.SetFieldsCount(2)
         self.sb.SetStatusWidths([-1, -1])
@@ -60,17 +57,13 @@ class ColorPrac(wx.Frame):
         toolbar.Realize()
         
         self.Bind(wx.EVT_TOOL, self.on_config, ctool)
-        
-        
+
     def on_config(self, e):
         """run when config button in toolbar."""
         
         self.config = configwindow.Config(self)
         self.config.Show()
-        
-    
 
-        
     def on_close(self, Event):
         """Executed when window is closed. Save config."""
         with open(save_file, "wb") as f:
@@ -78,10 +71,8 @@ class ColorPrac(wx.Frame):
             current_config = self.board.get_config()
             current_config["Ctotal"] = self.Ctotal
             pickle.dump(current_config, f)
-            
         self.Destroy()
-        
-    #----------------------------------------------------------------------
+
     def inc_counter(self):
         """Increment counters"""
         self.Ccurrent += 1

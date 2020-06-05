@@ -13,7 +13,7 @@ class GameBoard(wx.Panel):
         
         self.parent = parent
         
-        ##init_boad_data
+        #init_boad_data
         self.FieldWidth = 10
         self.FieldHeight = 20
     
@@ -25,6 +25,7 @@ class GameBoard(wx.Panel):
         # state.
         self.next_queue = []
         self.blind_count = 0
+        self.enabled_nexts = []
     
         #block colors.
         #color = [No block, I, L, O, J, S, Z, T, Gray]
@@ -37,7 +38,6 @@ class GameBoard(wx.Panel):
                            "#0000ff", # J
                            "#00ff00", # S
                            "#a9a9a9"] # Gray
-        
 
         self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
         
@@ -51,12 +51,11 @@ class GameBoard(wx.Panel):
         self.key_blind_num = "blind_num"
         self.key_blind = "blind"
         
-        ##set user configs if exist and set default config if doesn't exist.
+        #set user configs if exist and set default config if doesn't exist.
         self.config = config
         if config is None or not type(config) is dict:
             self.config = dict()
-            
-        
+
         if not self.key_colors in self.config.keys():
             #Colors for next blocks.
             color_table = ["Cyan",
@@ -68,7 +67,6 @@ class GameBoard(wx.Panel):
                            "Green"]
             
             self.config[self.key_colors] = {color:True for color in color_table}
-            
         if not self.key_height in self.config.keys():
             #Average height of blocks. (-1 to random)
             self.config[self.key_height] = -1
@@ -81,11 +79,7 @@ class GameBoard(wx.Panel):
         
         # Update self.enabled_nexts
         self.set_config(self.config)
-        
-              
-        
-                
-    
+
     def draw_block(self, x, y, shape):
         # This function is currentry not used.
         """draw square at (x, y) in board
@@ -104,9 +98,7 @@ class GameBoard(wx.Panel):
                          self.SquareSize,
                          self.SquareSize,
                          shape)
-        
-    
-        
+
     def draw_square(self, x, y, side_length, shape):
         """Draw rectangle at (x,y). x, y is coordinates of the topleft"""
         
@@ -115,15 +107,13 @@ class GameBoard(wx.Panel):
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.SetBrush(wx.Brush(self.colors[shape]))
         dc.DrawRectangle(x, y, side_length, side_length)   
-        
-        
+
     def draw_next(self, number, shape):
         self.draw_square(12*self.SquareSize,
                          int(self.SquareSize * 3.5 * number) , 
                          int(2*self.SquareSize),
                          shape)
-               
-        
+
     def on_key_down(self, event):
         self.parent.inc_counter()
         keycode = event.GetKeyCode()
@@ -165,7 +155,7 @@ class GameBoard(wx.Panel):
             else:
                 self.field[self.f_offset(hole_positions[1], y)] = self.shape_noblock
 
-                ##Refresh entire field
+                #Refresh entire field
         for x in range(self.FieldHeight * self.FieldWidth):
             self.draw_square((x % self.FieldWidth) * self.SquareSize,
                              (x // self.FieldWidth) * self.SquareSize,
@@ -183,14 +173,13 @@ class GameBoard(wx.Panel):
             self.draw_next(i, self.next_queue[i])
         self.next_queue = self.next_queue[1:]
 
-
     def shift_next_queue(self):
         for i in range(self.config[self.key_next]):
             self.draw_next(i, self.next_queue[i])
         self.next_queue = self.next_queue[1:]
 
     def show_new_question(self):
-        ##Make new question.
+        #Make new question.
         #At now, hole will change at most 1 time.
         
         if not self.config[self.key_blind]:
@@ -211,29 +200,19 @@ class GameBoard(wx.Panel):
             return self.FieldWidth * (self.FieldHeight - 1 - y) + x
         else:
             return self.FieldWidth * y + x
-        
-    
+
     def set_config(self, config):
         """setter of self.config"""
         #appdate enabled_nexts.
         index = 1
         self.enabled_nexts = []
         for color in config[self.key_colors]:
-            if config[self.key_colors][color] == True:
+            if config[self.key_colors][color]:
                 self.enabled_nexts.append(index)
-                
             index += 1
-        
         self.config = config
         
     def get_config(self):
         """getter of self.config"""
         return self.config
-        
-             
-                
-        
-            
-      
-        
-        
+
