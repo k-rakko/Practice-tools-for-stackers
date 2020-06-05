@@ -140,12 +140,23 @@ class GameBoard(wx.Panel):
         else:
             garbage_height = self.config[self.key_height]
 
-        height_change = [0, 0, 0, 0, 0, +1, +1, -1, -1, +2, -2]
+
 
         # this list contains list of height of garbage blocks.
         garbage_h_list = []
         for i in range(10):
-            garbage_height += height_change[random.randint(0, len(height_change) - 1)]
+            rand = random.random()
+            if rand <= 0.06:
+                height_change = +2
+            elif rand <= 0.5:
+                height_change = +1
+            else:
+                height_change = 0
+
+            rand = random.random()
+            if rand <= 0.5:
+                height_change *= -1
+            garbage_height += height_change
             garbage_h_list.append(garbage_height)
 
         # hole settings.
