@@ -207,6 +207,7 @@ class GameBoard(wx.Panel):
         
         if not self.config[self.key_blind]:
             self.update_board()
+            self.create_next_queue()
         else:
             self.blind_count %= self.config[self.key_blind_num]
             if self.blind_count == 0:
