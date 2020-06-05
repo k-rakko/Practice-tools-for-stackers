@@ -21,6 +21,10 @@ class GameBoard(wx.Panel):
         
         self.shape_noblock = 0
         self.shape_gray = 8
+
+        # state.
+        self.next_queue = []
+        self.blind_count = 0
     
         #block colors.
         #color = [No block, I, L, O, J, S, Z, T, Gray]
@@ -70,7 +74,10 @@ class GameBoard(wx.Panel):
             self.config[self.key_height] = -1
         if not self.key_next in self.config.keys():
             self.config[self.key_next] = 1
-        
+        if not self.key_blind_num in config.keys():
+            config[self.key_blind_num] = 3
+        if self.key_blind not in config.keys():
+            config[self.key_blind]= False
         
         # Update self.enabled_nexts
         self.set_config(self.config)
@@ -123,69 +130,79 @@ class GameBoard(wx.Panel):
         
         if keycode == wx.WXK_SPACE:
             self.show_new_question()
-            
-    def show_new_question(self):
-        ##Make new question.
-        #At now, hole will change at most 1 time.
-        
+
+    def update_board(self):
         # set average Height of blocks.
         if self.config[self.key_height] == -1:
             garbage_height = random.randint(0, int(self.FieldHeight) - 1)
         else:
             garbage_height = self.config[self.key_height]
-        
+
         height_change = [0, 0, 0, 0, 0, +1, +1, -1, -1, +2, -2]
-        
+
         # this list contains list of height of garbage blocks.
         garbage_h_list = []
         for i in range(10):
-            garbage_height += height_change[random.randint(0, len(height_change)-1)]
+            garbage_height += height_change[random.randint(0, len(height_change) - 1)]
             garbage_h_list.append(garbage_height)
-        
-        #hole settings.
-        hole_change = random.randint(0, max(0, garbage_height-1))
+
+        # hole settings.
+        hole_change = random.randint(0, max(0, garbage_height - 1))
         hole_positions = [random.randint(0, 9) for x in range(2)]
-        
-        #make gabage without hole.
+
+        # make gabage without hole.
         for x in range(self.FieldWidth):
             for y in range(self.FieldHeight):
                 if y <= garbage_h_list[x]:
                     self.field[self.f_offset(x, y)] = self.shape_gray
                 else:
                     self.field[self.f_offset(x, y)] = self.shape_noblock
- 
-        #create hole.
+
+        # create hole.
         for y in range(self.FieldHeight):
             if y < hole_change:
                 self.field[self.f_offset(hole_positions[0], y)] = self.shape_noblock
             else:
-                self.field[self.f_offset(hole_positions[1], y)] = self.shape_noblock        
-        
-        
-        ##Refresh entire field
+                self.field[self.f_offset(hole_positions[1], y)] = self.shape_noblock
+
+                ##Refresh entire field
         for x in range(self.FieldHeight * self.FieldWidth):
             self.draw_square((x % self.FieldWidth) * self.SquareSize,
                              (x // self.FieldWidth) * self.SquareSize,
                              self.SquareSize,
                              self.field[x])
-        
-        
-        #Draw next
-        next_index = random.randint(0, len(self.enabled_nexts)-1)
-        self.draw_next(0, self.enabled_nexts[next_index])
-        
-        #create new next color fro additional next.
-        for number in range(self.config[self.key_next] - 1):
-            next_index = random.randint(0, len(self.nextbag) - 1)
-            self.draw_next(number+1, self.nextbag.pop(next_index))
-            if len(self.nextbag) == 0:
-                self.nextbag = [x + 1 for x in range(0, 7)]
-                
-            else:
-                next_index = random.randint(0, len(self.enabled_nexts)-1)
-                self.draw_next(number, self.enabled_nexts[next_index])
-            
 
+    def create_next_queue(self):
+        self.next_queue = []
+        self.next_queue.append(random.choice(self.enabled_nexts))
+
+        for i in range(self.config[self.key_blind_num]//7+3):
+            self.next_queue += random.sample(range(1, 8), 7)
+
+        for i in range(self.config[self.key_next]):
+            self.draw_next(i, self.next_queue[i])
+        self.next_queue = self.next_queue[1:]
+
+
+    def shift_next_queue(self):
+        for i in range(self.config[self.key_next]):
+            self.draw_next(i, self.next_queue[i])
+        self.next_queue = self.next_queue[1:]
+
+    def show_new_question(self):
+        ##Make new question.
+        #At now, hole will change at most 1 time.
+        
+        if not self.config[self.key_blind]:
+            self.update_board()
+        else:
+            self.blind_count %= self.config[self.key_blind_num]
+            if self.blind_count == 0:
+                self.update_board()
+                self.create_next_queue()
+            else:
+                self.shift_next_queue()
+            self.blind_count += 1
                 
     def f_offset(self, x, y, bottom_to_top=True):
         """Calculate offset of self.field from x, y"""
