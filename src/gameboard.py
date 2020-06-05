@@ -25,6 +25,7 @@ class GameBoard(wx.Panel):
         self.next_queue = []
         self.blind_count = 0
         self.enabled_nexts = []
+        self.init_complete = False
     
         #block colors.
         #color = [No block, I, L, O, J, S, Z, T, Gray]
@@ -50,13 +51,13 @@ class GameBoard(wx.Panel):
         self.key_blind_num = "blind_num"
         self.key_blind = "blind"
         
-        #set user configs if exist and set default config if doesn't exist.
+        # set user configs if exist and set default config if doesn't exist.
         self.config = config
         if config is None or not type(config) is dict:
             self.config = dict()
 
         if not self.key_colors in self.config.keys():
-            #Colors for next blocks.
+            # Colors for next blocks.
             color_table = ["Cyan",
                            "Orange",
                            "Yellow",
@@ -67,7 +68,7 @@ class GameBoard(wx.Panel):
             
             self.config[self.key_colors] = {color:True for color in color_table}
         if not self.key_height in self.config.keys():
-            #Average height of blocks. (-1 to random)
+            # Average height of blocks. (-1 to random)
             self.config[self.key_height] = -1
         if not self.key_next in self.config.keys():
             self.config[self.key_next] = 1
@@ -78,6 +79,16 @@ class GameBoard(wx.Panel):
         
         # Update self.enabled_nexts
         self.set_config(self.config)
+
+    def init_board(self):
+        """Draw background and show first question."""
+        dc = wx.ClientDC(self)
+
+        dc.SetPen(wx.TRANSPARENT_PEN)
+        dc.SetBrush(wx.Brush("#616161"))
+        dc.DrawRectangle(0, 0, 300, 600)
+        self.init_complete = True
+
 
     def draw_block(self, x, y, shape):
         # This function is currentry not used.
@@ -121,6 +132,8 @@ class GameBoard(wx.Panel):
             self.show_new_question()
 
     def update_board(self):
+        if not self.init_complete:
+            self.init_board()
         # set average Height of blocks.
         if self.config[self.key_height] == -1:
             garbage_height = random.randint(0, int(self.FieldHeight) - 1)
@@ -158,7 +171,7 @@ class GameBoard(wx.Panel):
         for x in range(self.FieldHeight * self.FieldWidth):
             self.draw_square((x % self.FieldWidth) * self.SquareSize,
                              (x // self.FieldWidth) * self.SquareSize,
-                             self.SquareSize,
+                             self.SquareSize-1,
                              self.field[x])
 
     def create_next_queue(self):
