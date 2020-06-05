@@ -14,7 +14,6 @@ class Config(wx.Frame):
         self.key_colors = "colors"
         self.key_height = "height"
         self.key_next = "next"
-        self.key_colful = "colorful_next"
         
         self.init_ui()
         self.Center()
@@ -67,23 +66,6 @@ class Config(wx.Frame):
         
         self.next_spin.SetValue(config[self.key_next])
         next_sizer.Add(self.next_spin, 0, wx.ALL, 5)        
-        
-        # If checked, This will convert unchecked color
-        # for second and lator of nexts.
-        colorful_rtext = "Use unchecked colors for second and later of next."
-        
-        coloful_text = wx.StaticText(self,
-                                     wx.ID_ANY,
-                                     colorful_rtext)
-        next_sizer.Add(coloful_text, 0)
-        
-        self.colorful_checkbox = wx.CheckBox(self, wx.ID_ANY, "")
-        self.colorful_checkbox.SetValue(config[self.key_colful])
-        next_sizer.Add(self.colorful_checkbox,  0)
-        
-        
-        
-        
         ##Save and cancel config Button
         save_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -117,7 +99,6 @@ class Config(wx.Frame):
         ##Average height setting
         config[self.key_height] = self.h_spin.GetValue()
         config[self.key_next] = self.next_spin.GetValue()
-        config[self.key_colful] = self.colorful_checkbox.GetValue()
         
         #if checked == False, no box is checked so need to alert and return.
         if True in config[self.key_colors].values():

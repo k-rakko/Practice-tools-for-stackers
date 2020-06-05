@@ -68,8 +68,6 @@ class GameBoard(wx.Panel):
             self.config[self.key_height] = -1
         if not self.key_next in self.config.keys():
             self.config[self.key_next] = 1
-        if not self.key_colful in self.config.keys():
-            self.config[self.key_colful] = True
         
         
         # Update self.enabled_nexts
@@ -176,11 +174,10 @@ class GameBoard(wx.Panel):
         
         #create new next color fro additional next.
         for number in range(self.config[self.key_next] - 1):
-            if self.config[self.key_colful]:
-                next_index = random.randint(0, len(self.nextbag) - 1)
-                self.draw_next(number+1, self.nextbag.pop(next_index))
-                if len(self.nextbag) == 0:
-                    self.nextbag = [x + 1 for x in range(0, 7)]
+            next_index = random.randint(0, len(self.nextbag) - 1)
+            self.draw_next(number+1, self.nextbag.pop(next_index))
+            if len(self.nextbag) == 0:
+                self.nextbag = [x + 1 for x in range(0, 7)]
                 
             else:
                 next_index = random.randint(0, len(self.enabled_nexts)-1)
