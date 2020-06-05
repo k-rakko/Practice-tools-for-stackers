@@ -18,7 +18,7 @@ class ColorPrac(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self,
                           parent,
-                          size=(300, 520),
+                          size=(450, 750),
                           style=wx.DEFAULT_FRAME_STYLE
                                 ^ wx.RESIZE_BORDER
                                 ^ wx.MAXIMIZE_BOX)

@@ -16,7 +16,7 @@ class GameBoard(wx.Panel):
         self.FieldWidth = 10
         self.FieldHeight = 20
     
-        self.SquareSize = 20
+        self.SquareSize = 30
         
         self.shape_noblock = 0
         self.shape_gray = 8
