@@ -2,7 +2,6 @@
 
 import random
 import wx
-import os
 
 class GameBoard(wx.Panel):
     """panel for block field and next."""
