@@ -30,7 +30,7 @@ pip3 install wxpython
 ```
 
 ## How to launch?
-Click [here](https://github.com/k-rakko/recognize-pieces-color/archive/master.zip) to download zip file and....
+Click [here](https://github.com/k-rakko/Stackers-toolbox/releases) to download zip file and....
 
 
 #### Windows

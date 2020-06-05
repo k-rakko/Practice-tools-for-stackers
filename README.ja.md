@@ -29,7 +29,8 @@ pip3 install wxpython
 ```
 
 ## 起動方法
-まず、[ここ](https://github.com/k-rakko/recognize-pieces-color/archive/master.zip)をクリックしてファイルをダウンロードしてください。(git でclone してもおーけー)    
+まず、[ここ](https://github.com/k-rakko/Stackers-toolbox/releases)をクリックしてファイルをダウンロードしてください。(git でclone してもおーけー)    
+
 zip解凍後にlaunchersに移動して、windowsなら"recognize-piece-color.bat"を、それ以外のOSでは.shのほうをダブルクリックすれば起動するはずです。（多分。起動しなかったら[@rikurakko](https://twitter.com/rikurakko)に文句をいってください。）
 
 
