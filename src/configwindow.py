@@ -1,20 +1,14 @@
 """Config window."""
 import wx
+import game_engine as ge
 
-class Config(wx.Frame):
+class ConfigWindow(wx.Frame):
     """Main config window."""
     def __init__(self, parent):
         wx.Frame.__init__(self,
                           parent,
                           style=wx.DEFAULT_DIALOG_STYLE)
         self.parent = parent
-        # keys for config dictionary.
-        self.key_colors = "colors"
-        self.key_height = "height"
-        self.key_next = "next"
-        self.key_blind_num = "blind_num"
-        self.key_blind = "blind"
-
         self.col_check_list = []
         self.h_spin = wx.SpinCtrl(self, min=-1, max=20, style=wx.SP_ARROW_KEYS)
         self.next_spin = wx.SpinCtrl(self, min=1, max=6, style=wx.SP_ARROW_KEYS)
@@ -25,7 +19,7 @@ class Config(wx.Frame):
         self.Center()
         
     def init_ui(self):
-        config = self.parent.board.get_config()
+        config = self.parent.board.config
         top_sizer = wx.BoxSizer(wx.VERTICAL)
 
         #Color variation setting.
@@ -34,9 +28,9 @@ class Config(wx.Frame):
         c_text = wx.StaticText(self, wx.ID_ANY, "Colors")
         color_sizer.Add(c_text)
 
-        for color in config[self.key_colors]:
+        for color in config.all_colors:
             checkbox = wx.CheckBox(self, wx.ID_ANY, color)
-            checkbox.SetValue(config[self.key_colors][color])
+            checkbox.SetValue(color in config.enabled_colors)
             color_sizer.Add(checkbox)
             self.col_check_list.append((color, checkbox))
                        
@@ -48,7 +42,7 @@ class Config(wx.Frame):
         height_sizer.Add(h_text)
 
         
-        self.h_spin.SetValue(config[self.key_height])
+        self.h_spin.SetValue(config.ave_height)
         height_sizer.Add(self.h_spin)
         
         
@@ -61,7 +55,7 @@ class Config(wx.Frame):
         next_sizer.Add(next_text, 0, wx.ALL, 5)
         
         #Number of next.
-        self.next_spin.SetValue(config[self.key_next])
+        self.next_spin.SetValue(config.next_queue_len)
         next_sizer.Add(self.next_spin, 0, wx.ALL, 5)        
         # Blind mode.
         blind_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -73,12 +67,12 @@ class Config(wx.Frame):
         blind_sizer.Add(blind_text, 0)
         # enable or disable
 
-        self.blind_checkbox.SetValue(config[self.key_blind])
+        self.blind_checkbox.SetValue(config.blind_enable)
         blind_sizer.Add(self.blind_checkbox, 0)
         # how many times update next without updating field.
 
 
-        self.blind_spin.SetValue(config[self.key_blind_num])
+        self.blind_spin.SetValue(config.blind_num)
         blind_sizer.Add(self.blind_spin, 0)
 
         #Save and cancel config Button
@@ -103,21 +97,19 @@ class Config(wx.Frame):
 
     def on_click_save(self, e):
         """Launched when save button pressed."""
-        #Color setting
-        config = dict()
-        
-        config[self.key_colors] = dict()
+        config = ge.Config()
+        enabled_colors = []
         for color, checkbox in self.col_check_list:
-            conf = checkbox.GetValue()
-            config[self.key_colors][color] = conf
-        #Average height setting
-        config[self.key_height] = self.h_spin.GetValue()
-        config[self.key_next] = self.next_spin.GetValue()
-        config[self.key_blind] = self.blind_checkbox.GetValue()
-        config[self.key_blind_num] = self.blind_spin.GetValue()
+            if checkbox.GetValue():
+                enabled_colors.append(color)
+        config.enabled_colors = enabled_colors
+        config.ave_height = self.h_spin.GetValue()
+        config.next_queue_len = self.next_spin.GetValue()
+        config.blind_enable = self.blind_checkbox.GetValue()
+        config.blind_num = self.blind_spin.GetValue()
         #if checked == False, no box is checked so need to alert and return.
-        if True in config[self.key_colors].values():
-            self.parent.board.set_config(config)
+        if enabled_colors:
+            self.parent.board.config = config
             self.Close()
         else:
             dial = wx.MessageDialog(None,

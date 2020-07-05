@@ -2,6 +2,7 @@
 
 import random
 import wx
+import game_engine as ge
 
 class GameBoard(wx.Panel):
     """panel for block field and next."""
@@ -24,61 +25,30 @@ class GameBoard(wx.Panel):
         # state.
         self.next_queue = []
         self.blind_count = 0
-        self.enabled_nexts = []
         self.init_complete = False
     
         #block colors.
-        #color = [No block, I, L, O, J, S, Z, T, Gray]
-        self.colors = ['#000000', # No block
-                           '#87cefa', # I
-                           "#ffa500", # L
-                           "#ffff00", # O
-                           "#ff0000", # Z
-                           "#9400d3", # T
-                           "#0000ff", # J
-                           "#00ff00", # S
-                           "#a9a9a9"] # Gray
+        self.color_code = {
+                          0: '#000000',  #No Block
+                          1: '#87cefa', # I
+                          2: "#ffa500", # L
+                          3: "#ffff00", # O
+                          4: "#ff0000", # Z
+                          5: "#9400d3", # T
+                          6: "#0000ff", # J
+                          7: "#00ff00", # S
+                          8: "#a9a9a9"  # Gray
+        }
 
+        # game state
         self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
-        
-        self.nextbag = [x + 1 for x in range(7)]
-        
-        # keys for config dictionary
-        self.key_height = "height"
-        self.key_colors = "colors"
-        self.key_next = "next"
-        self.key_colful = "colorful_next"
-        self.key_blind_num = "blind_num"
-        self.key_blind = "blind"
-        
-        # set user configs if exist and set default config if doesn't exist.
-        self.config = config
-        if config is None or not type(config) is dict:
-            self.config = dict()
+        self.next_bag = [range(1, 8)]
 
-        if not self.key_colors in self.config.keys():
-            # Colors for next blocks.
-            color_table = ["Cyan",
-                           "Orange",
-                           "Yellow",
-                           "Red",
-                           "Purple",
-                           "Blue",
-                           "Green"]
-            
-            self.config[self.key_colors] = {color:True for color in color_table}
-        if not self.key_height in self.config.keys():
-            # Average height of blocks. (-1 to random)
-            self.config[self.key_height] = -1
-        if not self.key_next in self.config.keys():
-            self.config[self.key_next] = 1
-        if not self.key_blind_num in config.keys():
-            config[self.key_blind_num] = 3
-        if self.key_blind not in config.keys():
-            config[self.key_blind]= False
-        
-        # Update self.enabled_nexts
-        self.set_config(self.config)
+        # set user configs if exist and set default config if doesn't exist.
+        if config is None or not type(config) is ge.Config:
+            self._config = ge.Config()
+        else:
+            self._config = config
 
     def init_board(self):
         """Draw background and show first question."""
@@ -115,7 +85,7 @@ class GameBoard(wx.Panel):
         dc = wx.ClientDC(self)
         
         dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.SetBrush(wx.Brush(self.colors[shape]))
+        dc.SetBrush(wx.Brush(self.color_code[shape]))
         dc.DrawRectangle(x, y, side_length, side_length)   
 
     def draw_next(self, number, shape):
@@ -135,12 +105,10 @@ class GameBoard(wx.Panel):
         if not self.init_complete:
             self.init_board()
         # set average Height of blocks.
-        if self.config[self.key_height] == -1:
+        if self._config.ave_height == -1:
             garbage_height = random.randint(0, int(self.FieldHeight) - 1)
         else:
-            garbage_height = self.config[self.key_height]
-
-
+            garbage_height = self._config.ave_height
 
         # this list contains list of height of garbage blocks.
         garbage_h_list = []
@@ -187,17 +155,17 @@ class GameBoard(wx.Panel):
 
     def create_next_queue(self):
         self.next_queue = []
-        self.next_queue.append(random.choice(self.enabled_nexts))
+        self.next_queue.append(random.choice(self._config.enabled_colors_index))
 
-        for i in range(self.config[self.key_blind_num]//7+3):
+        for i in range(self._config.blind_num//7+3):
             self.next_queue += random.sample(range(1, 8), 7)
 
-        for i in range(self.config[self.key_next]):
+        for i in range(self._config.next_queue_len):
             self.draw_next(i, self.next_queue[i])
         self.next_queue = self.next_queue[1:]
 
     def shift_next_queue(self):
-        for i in range(self.config[self.key_next]):
+        for i in range(self._config.next_queue_len):
             self.draw_next(i, self.next_queue[i])
         self.next_queue = self.next_queue[1:]
 
@@ -205,11 +173,11 @@ class GameBoard(wx.Panel):
         #Make new question.
         #At now, hole will change at most 1 time.
         
-        if not self.config[self.key_blind]:
+        if not self._config.blind_enable:
             self.update_board()
             self.create_next_queue()
         else:
-            self.blind_count %= self.config[self.key_blind_num]
+            self.blind_count %= self._config.blind_num
             if self.blind_count == 0:
                 self.update_board()
                 self.create_next_queue()
@@ -225,18 +193,12 @@ class GameBoard(wx.Panel):
         else:
             return self.FieldWidth * y + x
 
-    def set_config(self, config):
-        """setter of self.config"""
-        #appdate enabled_nexts.
-        index = 1
-        self.enabled_nexts = []
-        for color in config[self.key_colors]:
-            if config[self.key_colors][color]:
-                self.enabled_nexts.append(index)
-            index += 1
-        self.config = config
-        
-    def get_config(self):
-        """getter of self.config"""
-        return self.config
+    @property
+    def config(self):
+        return self._config
+
+    @config.setter
+    def config(self, config):
+        self._config = config
+
 

@@ -6,6 +6,7 @@ import pickle
 
 import configwindow
 import gameboard
+import game_engine as ge
 
 
 # Directory for icons
@@ -29,13 +30,14 @@ class ColorPrac(wx.Frame):
         #load previous config if exist.        
         try:
             with open(save_file, mode="rb") as f:
-                config = pickle.load(f)
-        except (FileNotFoundError, EOFError):
-            config = dict()
+                config, counter_total = pickle.load(f)
+        except (FileNotFoundError, EOFError, TypeError, ValueError):
+            config = ge.Config()
+            counter_total = 0
             
         #Read config about counter
-        self.Ctotal = config.get("Ctotal", 0)
-        self.Ccurrent = 0
+        self.counter_total = counter_total
+        self.counter_current = 0
 
         self.board = gameboard.GameBoard(self, config)
         self.board.SetFocus()
@@ -46,8 +48,8 @@ class ColorPrac(wx.Frame):
         self.sb = self.CreateStatusBar()
         self.sb.SetFieldsCount(2)
         self.sb.SetStatusWidths([-1, -1])
-        self.sb.SetStatusText("Counter: "+str(self.Ccurrent), 0)
-        self.sb.SetStatusText("Total: "+str(self.Ctotal), 1)
+        self.sb.SetStatusText("Counter: " + str(self.counter_current), 0)
+        self.sb.SetStatusText("Total: " + str(self.counter_total), 1)
         
         toolbar = self.CreateToolBar()
         ctool = toolbar.AddTool(wx.ID_ANY,
@@ -60,25 +62,22 @@ class ColorPrac(wx.Frame):
 
     def on_config(self, e):
         """run when config button in toolbar."""
-        
-        self.config = configwindow.Config(self)
-        self.config.Show()
+        self.config_window = configwindow.ConfigWindow(self)
+        self.config_window.Show()
 
     def on_close(self, Event):
         """Executed when window is closed. Save config."""
         with open(save_file, "wb") as f:
-            
-            current_config = self.board.get_config()
-            current_config["Ctotal"] = self.Ctotal
-            pickle.dump(current_config, f)
+            config = self.board.config
+            pickle.dump((config,self.counter_total), f)
         self.Destroy()
 
     def inc_counter(self):
         """Increment counters"""
-        self.Ccurrent += 1
-        self.Ctotal += 1
-        self.SetStatusText("Counter: "+str(self.Ccurrent), 0)
-        self.SetStatusText("Total: "+str(self.Ctotal), 1)        
+        self.counter_current += 1
+        self.counter_total += 1
+        self.SetStatusText("Counter: " + str(self.counter_current), 0)
+        self.SetStatusText("Total: " + str(self.counter_total), 1)
 
 
 def main():
@@ -90,10 +89,3 @@ def main():
     
 if __name__ == "__main__":
     main()
-    
-    
-        
-        
-        
-        
-                                    
