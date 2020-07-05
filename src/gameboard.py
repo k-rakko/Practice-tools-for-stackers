@@ -42,13 +42,14 @@ class GameBoard(wx.Panel):
 
         # game state
         self.field = [0 for x in range(self.FieldHeight*self.FieldWidth)]
-        self.next_bag = [range(1, 8)]
+        self.next_bag = [x for x in range(1, 8)]
 
+
+        self._config = ge.Config()
         # set user configs if exist and set default config if doesn't exist.
-        if config is None or not type(config) is ge.Config:
-            self._config = ge.Config()
-        else:
-            self._config = config
+        if type(config) is ge.Config:
+            self._config.load(config)
+
 
     def init_board(self):
         """Draw background and show first question."""
@@ -101,17 +102,30 @@ class GameBoard(wx.Panel):
         if keycode == wx.WXK_SPACE:
             self.show_new_question()
 
-    def update_board(self):
-        if not self.init_complete:
-            self.init_board()
-        # set average Height of blocks.
-        if self._config.ave_height == -1:
-            garbage_height = random.randint(0, int(self.FieldHeight) - 1)
-        else:
-            garbage_height = self._config.ave_height
+    def make_garbage_easy(self):
+        garbage_1 = [0, 0, 0, 0]
+        change = random.randint(-1, 1)
+        garbage_1[random.randint(0, 3)] = change
 
-        # this list contains list of height of garbage blocks.
-        garbage_h_list = []
+        garbage_2 = [0, 0, 0]
+        change = random.randint(-1, 1)
+        garbage_2[random.randint(0, 2)] = change
+
+        garbage_3 = [0, 0]
+        change = random.randint(-1, 1)
+        garbage_3[random.randint(0, 1)] = change
+
+        garbage_4 = [0]
+
+        garbage_change_list = []
+        garbage_list = [garbage_1, garbage_2, garbage_3, garbage_4]
+
+        for i in range(4):
+            garbage_change_list += garbage_list.pop(random.randint(0, 3-i))
+        return garbage_change_list
+
+    def make_garbage_normal(self):
+        garbage_change_list = []
         for i in range(10):
             rand = random.random()
             if rand <= 0.06:
@@ -124,9 +138,29 @@ class GameBoard(wx.Panel):
             rand = random.random()
             if rand <= 0.5:
                 height_change *= -1
-            garbage_height += height_change
-            garbage_h_list.append(garbage_height)
+            garbage_change_list.append(height_change)
+        return garbage_change_list
 
+    def update_board(self):
+        if not self.init_complete:
+            self.init_board()
+
+        if self._config.field_mode == "easy":
+            garbage_change_list = self.make_garbage_easy()
+        elif self._config.field_mode == "normal":
+            garbage_change_list = self.make_garbage_normal()
+
+        # set average Height of blocks.
+        if self._config.ave_height == -1:
+            garbage_height = random.randint(0, int(self.FieldHeight) - 1)
+        else:
+            garbage_height = self._config.ave_height
+
+        garbage_h_list = [x+garbage_height for x in garbage_change_list]
+        for i in range(len(garbage_h_list)):
+            if garbage_h_list[i] < 0:
+                garbage_h_list[i] = 0
+            
         # hole settings.
         hole_change = random.randint(0, max(0, garbage_height - 1))
         hole_positions = [random.randint(0, 9) for x in range(2)]
@@ -199,6 +233,6 @@ class GameBoard(wx.Panel):
 
     @config.setter
     def config(self, config):
-        self._config = config
+        self._config.load(config)
 
 

@@ -14,6 +14,7 @@ class ConfigWindow(wx.Frame):
         self.next_spin = wx.SpinCtrl(self, min=1, max=6, style=wx.SP_ARROW_KEYS)
         self.blind_checkbox = wx.CheckBox(self, wx.ID_ANY, "")
         self.blind_spin = wx.SpinCtrl(self, min=0, max=99, style=wx.SP_ARROW_KEYS)
+        self.mode_radios = []
 
         self.init_ui()
         self.Center()
@@ -75,6 +76,22 @@ class ConfigWindow(wx.Frame):
         self.blind_spin.SetValue(config.blind_num)
         blind_sizer.Add(self.blind_spin, 0)
 
+        # field mode.
+        field_mode_sizer = wx.BoxSizer(wx.VERTICAL)
+        field_rtext = "Field complexity"
+        field_text = wx.StaticText(self,
+                                   wx.ID_ANY,
+                                   field_rtext)
+        field_mode_sizer.Add(field_text, 0)
+        for mode in config.all_field_mode:
+            radio = wx.RadioButton(self, wx.ID_ANY, mode)
+            if mode == config.field_mode:
+                radio.SetValue(True)
+            else:
+                radio.SetValue(False)
+            field_mode_sizer.Add(radio)
+            self.mode_radios.append((radio, mode))
+
         #Save and cancel config Button
         save_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -91,6 +108,7 @@ class ConfigWindow(wx.Frame):
         top_sizer.Add(height_sizer, 0, wx.ALL, 5)
         top_sizer.Add(next_sizer, 0, wx.ALL, 5)
         top_sizer.Add(blind_sizer, 0, wx.ALL, 5)
+        top_sizer.Add(field_mode_sizer, 0, wx.ALL, 5)
         top_sizer.Add(save_sizer, 0, wx.ALL, 5)
         
         self.SetSizerAndFit(top_sizer)
@@ -107,6 +125,9 @@ class ConfigWindow(wx.Frame):
         config.next_queue_len = self.next_spin.GetValue()
         config.blind_enable = self.blind_checkbox.GetValue()
         config.blind_num = self.blind_spin.GetValue()
+        for radio, mode in self.mode_radios:
+            if radio.GetValue():
+                config.field_mode = mode
         #if checked == False, no box is checked so need to alert and return.
         if enabled_colors:
             self.parent.board.config = config

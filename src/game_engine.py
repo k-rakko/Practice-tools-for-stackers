@@ -20,6 +20,9 @@ class Config:
         self._next_queue = 3
         self._blind_enable = False
         self._blind_num = 3
+        self._all_field_mode = ["easy", "normal"]
+        self._field_mode = "easy"
+
 
         if not source:
             self.load(source)
@@ -90,14 +93,32 @@ class Config:
     @blind_num.setter
     def blind_num(self, source):
         self._blind_num = source
+
+    @property
+    def all_field_mode(self):
+        return self._all_field_mode
+
+    @property
+    def field_mode(self):
+        return self._field_mode
+
+    @field_mode.setter
+    def field_mode(self, source):
+        if source in self._all_field_mode:
+            self._field_mode = source
         
     def load(self, source):
-        if source is Config:
-            self.enabled_colors = source.enabled_colors
-            self.ave_height= source.ave_height
-            self.next_queue_len = source.next_queue_len
-            self.blind_enable = source.blind_enable
-            self.blind_num = soure.blind_num
+        if type(source) is Config:
+            try:
+                self.enabled_colors = source.enabled_colors
+                self.ave_height = source.ave_height
+                self.next_queue_len = source.next_queue_len
+                self.blind_enable = source.blind_enable
+                self.blind_num = source.blind_num
+                self.field_mode = source.field_mode
+            except (AttributeError):
+                pass
+
 
 
 
